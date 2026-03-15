@@ -1,0 +1,32 @@
+# Turnos App - MVP
+
+## Descripción
+App de reserva de turnos donde el profesional comparte un link único al cliente. El cliente accede, ve un calendario con disponibilidad y reserva su turno.
+
+## Stack
+- Next.js 15 con App Router y TypeScript
+- Tailwind CSS para estilos
+- Supabase para base de datos y autenticación
+- Mercado Pago para pagos (solo Argentina, ARS)
+- Telegram Bot API para notificaciones
+
+## Flujo principal
+1. El profesional se registra, configura su disponibilidad y obtiene un link único
+2. El cliente accede al link y ve un calendario para reservar
+3. Si el profesional NO requiere pago → reserva se confirma automáticamente
+4. Si el profesional SÍ requiere pago → turno queda PENDING 24hs esperando pago vía Mercado Pago
+5. La app verifica monto y nombre del pagador vía webhook de Mercado Pago
+6. Si coincide → CONFIRMED. Si no o vence el tiempo → CANCELLED y se libera el slot
+
+## Modelo de datos
+- professionals: id, name, email, mp_access_token, requires_payment, session_price, session_duration_minutes, telegram_chat_id
+- availability_slots: id, professional_id, start_time, end_time, is_blocked
+- bookings: id, professional_id, slot_id, client_name, client_email, client_phone, status (PENDING/CONFIRMED/CANCELLED), payment_id, expires_at, created_at
+- payments: id, booking_id, mp_payment_id, amount, payer_name, status, received_at
+
+## Reglas de desarrollo
+- Siempre usar TypeScript estricto
+- Comentar el código en español
+- Mantener componentes pequeños y reutilizables
+- Usar variables de entorno para todas las claves API
+- El MVP tiene un solo tipo de sesión por profesional
