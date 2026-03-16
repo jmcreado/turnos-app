@@ -86,7 +86,7 @@ export function SlotsCalendar({ professionalId, slots }: Props) {
           const weekStart = new Date(weekKey);
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekEnd.getDate() + 6);
-          const weekLabel = `${formatDate(weekStart)} – ${formatDate(weekEnd)}`;
+          const weekLabel = `${formatDate(weekStart.toISOString())} – ${formatDate(weekEnd.toISOString())}`;
 
           return (
             <div key={weekKey}>
