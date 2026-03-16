@@ -80,9 +80,9 @@ async function getAllBookingsWithSlots(
 
   const withSlot = data.map((b) => {
     const { availability_slots, ...rest } = b as {
-      availability_slots?: { start_time: string; end_time: string };
+      availability_slots?: { start_time: string; end_time: string }[];
     } & Omit<Booking, "slot">;
-    return { ...rest, slot: availability_slots ?? undefined } as Booking;
+    return { ...rest, slot: availability_slots?.[0] ?? undefined } as Booking;
   });
 
   const now = new Date().getTime();
