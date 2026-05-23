@@ -6,29 +6,28 @@ import { revalidatePath } from "next/cache";
 type CreateBookingInput = {
   slotId: string;
   professionalId: string;
+  serviceId: string;
   clientName: string;
   clientEmail: string;
   clientPhone: string;
 };
 
-/**
- * Crea una reserva. Si el profesional no requiere pago → CONFIRMED; si no → PENDING.
- */
 export async function createBooking(input: CreateBookingInput) {
   const supabase = await createClient();
 
-  const { data: professional } = await supabase
-    .from("professionals")
+  // Obtener configuración del servicio seleccionado
+  const { data: service } = await supabase
+    .from("services")
     .select("requires_payment")
-    .eq("id", input.professionalId)
+    .eq("id", input.serviceId)
     .single();
 
-  if (!professional) {
-    return { ok: false, error: "Profesional no encontrado." };
+  if (!service) {
+    return { ok: false, error: "Servicio no encontrado." };
   }
 
-  const status = professional.requires_payment ? "PENDING" : "CONFIRMED";
-  const expiresAt = professional.requires_payment
+  const status = service.requires_payment ? "PENDING" : "CONFIRMED";
+  const expiresAt = service.requires_payment
     ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     : null;
 
@@ -36,6 +35,7 @@ export async function createBooking(input: CreateBookingInput) {
     .from("bookings")
     .insert({
       professional_id: input.professionalId,
+      service_id: input.serviceId,
       slot_id: input.slotId,
       client_name: input.clientName.trim(),
       client_email: input.clientEmail.trim(),
