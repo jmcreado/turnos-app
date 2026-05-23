@@ -117,7 +117,7 @@ export default async function DashboardPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((service) => {
                 const m = metrics[service.id] ?? { total: 0, unique: 0, returning: 0 };
-                const shareUrl = `${baseUrl}/book/${professional.slug}/${service.id}`;
+                const shareUrl = `${baseUrl}/book/${professional.slug}?service=${service.id}`;
                 return (
                   <div key={service.id} className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
                     <div className="flex items-start justify-between">
