@@ -1,120 +1,96 @@
-"use client";
+'use client'
 
-import { createClient } from "@/lib/supabase/client";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { createBrowserClient } from '@supabase/ssr'
 
 function LoginForm() {
-  const searchParams = useSearchParams();
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(() => {
-    const err = searchParams.get("error");
-    if (err === "auth_callback_error") {
-      return "El enlace expiró o es inválido. Solicitá uno nuevo.";
-    }
-    return null;
-  });
+  const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const searchParams = useSearchParams()
+  const authError = searchParams.get('error')
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    const supabase = createClient();
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    setLoading(false);
-    if (err) {
-      setError(err.message);
-      return;
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    const origin = window.location.origin
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${origin}/auth/callback` },
+    })
+    if (error) {
+      setError('No pudimos enviar el link. Revisá el email e intentá de nuevo.')
+    } else {
+      setSent(true)
     }
-    setSent(true);
-  }
-
-  if (sent) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
-        <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
-          <h1 className="text-xl font-semibold text-zinc-900">
-            Revisá tu correo
-          </h1>
-          <p className="mt-2 text-zinc-600">
-            Enviamos un enlace mágico a <strong>{email}</strong>. Hacé clic en
-            el enlace para ingresar al dashboard.
-          </p>
-          <button
-            type="button"
-            onClick={() => setSent(false)}
-            className="mt-6 text-sm font-medium text-zinc-600 underline hover:text-zinc-900"
-          >
-            Usar otro email
-          </button>
-        </div>
-      </div>
-    );
+    setLoading(false)
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
-      <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <h1 className="text-xl font-semibold text-zinc-900">
-          Ingresar como profesional
-        </h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          Ingresá tu email y te enviamos un enlace para entrar sin contraseña.
-        </p>
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
-              required
-              autoComplete="email"
-              className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
-            />
+    <div style={{ minHeight: '100vh', backgroundColor: '#f7f5f0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'DM Sans, sans-serif' }}>
+      <a href="/" style={{ marginBottom: '48px', textDecoration: 'none' }}>
+        <span style={{ fontFamily: 'DM Serif Display, serif', fontSize: '28px', color: '#0f0f0f', letterSpacing: '-0.5px' }}>bo<span style={{ color: '#1a6b4a' }}>ko</span></span>
+      </a>
+      <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#ffffff', borderRadius: '16px', padding: '40px', boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)' }}>
+        {authError && (
+          <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px 16px', marginBottom: '24px', color: '#dc2626', fontSize: '14px' }}>
+            El link expiró o no es válido. Solicitá uno nuevo.
           </div>
-          {error && (
-            <p className="text-sm text-red-600" role="alert">
-              {error}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50"
-          >
-            {loading ? "Enviando…" : "Enviar enlace mágico"}
-          </button>
-        </form>
+        )}
+        {sent ? (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: '48px', height: '48px', backgroundColor: '#e8f2ed', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a6b4a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+            </div>
+            <h2 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '22px', color: '#0f0f0f', marginBottom: '8px' }}>Revisá tu correo</h2>
+            <p style={{ color: '#4a4a4a', fontSize: '15px', lineHeight: '1.5' }}>Te enviamos un link de acceso a <strong>{email}</strong>. Expira en 1 hora.</p>
+            <button onClick={() => { setSent(false); setEmail('') }} style={{ marginTop: '24px', color: '#1a6b4a', background: 'none', border: 'none', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}>Usar otro email</button>
+          </div>
+        ) : (
+          <>
+            <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '26px', color: '#0f0f0f', marginBottom: '8px', lineHeight: '1.2' }}>Ingresá a tu cuenta</h1>
+            <p style={{ color: '#4a4a4a', fontSize: '15px', marginBottom: '32px' }}>Te enviamos un link mágico, sin contraseña.</p>
+            <form onSubmit={handleSubmit}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#0f0f0f', marginBottom: '6px' }}>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                required
+                style={{ width: '100%', padding: '12px 14px', fontSize: '15px', border: '1.5px solid #e0ddd6', borderRadius: '8px', backgroundColor: '#faf9f7', color: '#0f0f0f', outline: 'none', boxSizing: 'border-box' }}
+                onFocus={(e) => e.target.style.borderColor = '#1a6b4a'}
+                onBlur={(e) => e.target.style.borderColor = '#e0ddd6'}
+              />
+              {error && <p style={{ color: '#dc2626', fontSize: '13px', marginTop: '8px' }}>{error}</p>}
+              <button
+                type="submit"
+                disabled={loading || !email}
+                style={{ width: '100%', marginTop: '20px', padding: '13px', backgroundColor: loading || !email ? '#a3c4b5' : '#1a6b4a', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: loading || !email ? 'not-allowed' : 'pointer' }}
+              >
+                {loading ? 'Enviando...' : 'Enviar link de acceso'}
+              </button>
+            </form>
+          </>
+        )}
       </div>
+      <p style={{ marginTop: '32px', color: '#4a4a4a', fontSize: '13px' }}>¿No tenés cuenta? <a href="/#pricing" style={{ color: '#1a6b4a', textDecoration: 'none', fontWeight: '500' }}>Conocé los planes</a></p>
     </div>
-  );
+  )
 }
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-          <div className="text-zinc-500">Cargando…</div>
-        </div>
-      }
-    >
+    <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: '#f7f5f0' }} />}>
       <LoginForm />
     </Suspense>
-  );
+  )
 }
