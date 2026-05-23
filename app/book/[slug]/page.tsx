@@ -86,17 +86,7 @@ export default async function BookPage({ params, searchParams }: Props) {
           {activeServices.length > 1 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {activeServices.map((s) => (
-                
-                  key={s.id}
-                  href={`/book/${slug}?service=${s.id}`}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                    s.id === selectedService.id
-                      ? "bg-zinc-900 text-white"
-                      : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
-                  }`}
-                >
-                  {s.name}
-                </a>
+                <a key={s.id} href={`/book/${slug}?service=${s.id}`} className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${s.id === selectedService.id ? "bg-zinc-900 text-white" : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}>{s.name}</a>
               ))}
             </div>
           )}

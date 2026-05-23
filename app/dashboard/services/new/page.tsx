@@ -47,10 +47,7 @@ export default function NewServicePage() {
     });
 
     setLoading(false);
-    if (insertError) {
-      setError(insertError.message);
-      return;
-    }
+    if (insertError) { setError(insertError.message); return; }
     router.push("/dashboard");
     router.refresh();
   }
@@ -59,27 +56,14 @@ export default function NewServicePage() {
     <div className="min-h-screen bg-zinc-50 py-8">
       <div className="mx-auto max-w-lg px-4">
         <div className="mb-6">
-          
-            href="/dashboard"
-            className="text-sm text-zinc-500 hover:text-zinc-700"
-          >
-            ← Volver al dashboard
-          </a>
+          <a href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-700">← Volver al dashboard</a>
         </div>
-
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-zinc-900">
-            Nuevo servicio
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Configurá los detalles de tu servicio.
-          </p>
-
+          <h1 className="text-lg font-semibold text-zinc-900">Nuevo servicio</h1>
+          <p className="mt-1 text-sm text-zinc-500">Configurá los detalles de tu servicio.</p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-700">
-                Nombre del servicio *
-              </label>
+              <label className="block text-sm font-medium text-zinc-700">Nombre del servicio *</label>
               <input
                 type="text"
                 required
@@ -89,11 +73,8 @@ export default function NewServicePage() {
                 className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20"
               />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-zinc-700">
-                Descripción (opcional)
-              </label>
+              <label className="block text-sm font-medium text-zinc-700">Descripción (opcional)</label>
               <textarea
                 rows={2}
                 placeholder="Breve descripción del servicio"
@@ -102,76 +83,47 @@ export default function NewServicePage() {
                 className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20"
               />
             </div>
-
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-zinc-700">
-                  Duración (min)
-                </label>
+                <label className="block text-sm font-medium text-zinc-700">Duración (min)</label>
                 <input
                   type="number"
                   min={15}
                   max={480}
                   step={15}
                   value={form.duration_minutes}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, duration_minutes: Number(e.target.value) || 60 }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, duration_minutes: Number(e.target.value) || 60 }))}
                   className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700">
-                  Precio (ARS)
-                </label>
+                <label className="block text-sm font-medium text-zinc-700">Precio (ARS)</label>
                 <input
                   type="number"
                   min={0}
                   step={100}
                   value={form.price}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, price: Number(e.target.value) || 0 }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) || 0 }))}
                   className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none"
                 />
               </div>
             </div>
-
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
                 id="requires_payment"
                 checked={form.requires_payment}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, requires_payment: e.target.checked }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, requires_payment: e.target.checked }))}
                 className="h-4 w-4 rounded border-zinc-300"
               />
-              <label htmlFor="requires_payment" className="text-sm text-zinc-700">
-                Requiero pago previo para confirmar el turno
-              </label>
+              <label htmlFor="requires_payment" className="text-sm text-zinc-700">Requiero pago previo para confirmar el turno</label>
             </div>
-
-            {error && (
-              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-                {error}
-              </p>
-            )}
-
+            {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
             <div className="flex gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
-              >
+              <button type="submit" disabled={loading} className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50">
                 {loading ? "Guardando…" : "Crear servicio"}
               </button>
-              
-                href="/dashboard"
-                className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-              >
-                Cancelar
-              </a>
+              <a href="/dashboard" className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Cancelar</a>
             </div>
           </form>
         </div>
