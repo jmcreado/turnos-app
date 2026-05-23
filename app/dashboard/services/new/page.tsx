@@ -89,7 +89,7 @@ export default function NewServicePage() {
                 <input
                   type="number"
                   min={15}
-                  max={480}
+                  max={999999}
                   step={15}
                   value={form.duration_minutes}
                   onChange={(e) => setForm((f) => ({ ...f, duration_minutes: Number(e.target.value) || 60 }))}
@@ -101,7 +101,7 @@ export default function NewServicePage() {
                 <input
                   type="number"
                   min={0}
-                  step={100}
+                  step={1}
                   value={form.price}
                   onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) || 0 }))}
                   className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none"
