@@ -100,7 +100,7 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
     });
     setLoading(false);
     if (!res.ok) { setError(res.error ?? "Error al reservar."); return; }
-    setManagementToken(res.managementToken);
+    setManagementToken(res.managementToken ?? null);
     setBookedAt({ time: fmtTime(selectedSlot.start_time), date: fmtDateShort(selectedSlot.start_time) });
     setStep("success");
   }
