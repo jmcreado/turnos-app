@@ -1,6 +1,6 @@
 /**
- * Tipos del modelo de datos (Supabase).
- * professionals incluye slug y service_name para el dashboard (agregar a la tabla si no existen).
+ * types/database.ts
+ * Tipos del modelo de datos (Supabase) — Tornu v2
  */
 
 export type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED";
@@ -10,9 +10,7 @@ export interface Professional {
   user_id: string | null;
   name: string;
   email: string;
-  /** Nombre del servicio que ofrece (ej. "Consulta psicológica") */
   service_name: string | null;
-  /** Slug único para la URL de reserva (ej. "maria-lopez") */
   slug: string | null;
   session_duration_minutes: number;
   session_price: number;
@@ -35,13 +33,26 @@ export interface Booking {
   id: string;
   professional_id: string;
   slot_id: string;
+  service_id: string | null;
   client_name: string;
   client_email: string;
   client_phone: string | null;
   status: BookingStatus;
   payment_id: string | null;
   expires_at: string | null;
+  management_token: string | null;
   created_at: string;
-  /** Joins: slot para start_time/end_time */
+  /** Joins */
   slot?: { start_time: string; end_time: string };
+  service?: { name: string; price: number; duration_minutes: number } | null;
+}
+
+export interface SlotWaitlist {
+  id: string;
+  slot_id: string;
+  professional_id: string;
+  client_name: string;
+  client_email: string;
+  notified: boolean;
+  created_at: string;
 }
