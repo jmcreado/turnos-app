@@ -48,6 +48,6 @@ CREATE POLICY "Profesionales gestionan su waitlist"
 
 -- 3. Permitir que clientes lean/actualicen su booking por token
 --    (La validación real la hace el admin client en el server action)
-CREATE POLICY IF NOT EXISTS "Público puede leer bookings"
+CREATE POLICY "Público puede leer bookings"
   ON bookings FOR SELECT
   USING (true);
