@@ -44,7 +44,7 @@ export default function Home() {
       `}</style>
 
       <nav>
-        <a href="/" className="logo">Bo<span>ko</span></a>
+        <a href="/" className="logo">Tor<span>nu</span></a>
         <ul>
           <li><a href="#como">Cómo funciona</a></li>
           <li><a href="#features">Features</a></li>
@@ -84,8 +84,8 @@ export default function Home() {
       </div>
 
       <footer>
-        <a href="/" className="footer-logo">Boko</a>
-        <span>© 2026 Boko · Hecho en Argentina 🇦🇷</span>
+        <a href="/" className="footer-logo">Tornu</a>
+        <span>© 2026 Tornu · Hecho en Argentina 🇦🇷</span>
         <span>Términos · Privacidad</span>
       </footer>
     </div>
