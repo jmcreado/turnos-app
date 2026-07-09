@@ -17,6 +17,8 @@ export interface Professional {
   requires_payment: boolean;
   mp_access_token: string | null;
   telegram_chat_id: string | null;
+  is_active: boolean;
+  deactivated_at: string | null;
   created_at?: string;
   updated_at?: string;
 }

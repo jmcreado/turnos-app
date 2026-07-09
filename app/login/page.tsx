@@ -37,7 +37,7 @@ function LoginForm() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f7f5f0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'DM Sans, sans-serif' }}>
       <a href="/" style={{ marginBottom: '48px', textDecoration: 'none' }}>
-        <span style={{ fontFamily: 'DM Serif Display, serif', fontSize: '28px', color: '#0f0f0f', letterSpacing: '-0.5px' }}>bo<span style={{ color: '#1a6b4a' }}>ko</span></span>
+        <span style={{ fontFamily: 'DM Serif Display, serif', fontSize: '28px', color: '#0f0f0f', letterSpacing: '-0.5px' }}>Tor<span style={{ color: '#1a6b4a' }}>nu</span></span>
       </a>
       <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#ffffff', borderRadius: '16px', padding: '40px', boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)' }}>
         {authError && (

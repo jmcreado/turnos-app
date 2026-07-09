@@ -39,6 +39,7 @@ export async function getProfessionalBySlug(
     .from("professionals")
     .select("*")
     .eq("slug", slug)
+    .eq("is_active", true)
     .maybeSingle();
 
   return data as Professional | null;
@@ -55,6 +56,7 @@ export async function getProfessionalById(
     .from("professionals")
     .select("*")
     .eq("id", id)
+    .eq("is_active", true)
     .maybeSingle();
 
   return data as Professional | null;

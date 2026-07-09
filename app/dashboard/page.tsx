@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ProfileForm } from "./components/ProfileForm";
 import { WelcomePanel } from "./components/WelcomePanel";
+import { ReactivateAccount } from "./components/ReactivateAccount";
 import { TurnosSectionProvider, TurnosSummaryCards, TurnosList } from "./components/TurnosSummary";
 import { CopyButton } from "./components/CopyButton";
 import type { Professional, Booking } from "@/types/database";
@@ -81,6 +82,14 @@ export default async function DashboardPage() {
     return (
       <div className="min-h-screen py-10" style={{ backgroundColor: G.cream }}>
         <ProfileForm userEmail={user.email ?? ""} userId={user.id} />
+      </div>
+    );
+  }
+
+  if (!professional.is_active) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: G.cream }}>
+        <ReactivateAccount professionalId={professional.id} />
       </div>
     );
   }
