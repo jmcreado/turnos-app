@@ -88,3 +88,23 @@ export async function createBooking(input: CreateBookingInput) {
     status: data.status as "CONFIRMED" | "PENDING",
   };
 }
+
+/**
+ * Cancela un turno desde el dashboard del profesional.
+ */
+export async function cancelBookingByProfessional(bookingId: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("bookings")
+    .update({ status: "CANCELLED" })
+    .eq("id", bookingId);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/availability");
+  return { ok: true };
+}
