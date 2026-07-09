@@ -7,16 +7,20 @@ import { revalidatePath } from "next/cache";
 
 type CreateProfileInput = {
   name: string;
+};
+
+type UpdateProfileInput = Partial<{
+  name: string;
   service_name: string;
   session_duration_minutes: number;
   session_price: number;
   requires_payment: boolean;
-};
-
-type UpdateProfileInput = Partial<CreateProfileInput>;
+}>;
 
 /**
  * Crea el perfil del profesional (primera vez). Requiere sesión.
+ * Solo pide datos de la cuenta — los servicios se configuran después,
+ * ya dentro del dashboard (/dashboard/services/new).
  */
 export async function createProfessionalProfile(
   input: CreateProfileInput,
@@ -33,11 +37,7 @@ export async function createProfessionalProfile(
       user_id: userId,
       name: input.name.trim(),
       email: userEmail,
-      service_name: input.service_name.trim() || null,
       slug,
-      session_duration_minutes: Math.max(15, Math.min(120, input.session_duration_minutes)),
-      session_price: Math.max(0, input.session_price),
-      requires_payment: input.requires_payment,
     })
     .select("id")
     .single();
