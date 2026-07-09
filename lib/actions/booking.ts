@@ -65,8 +65,10 @@ export async function createBooking(input: CreateBookingInput) {
     return { ok: false, error: error.message };
   }
 
+  const managementToken: string | null = data.management_token ?? null;
+
   // Enviar email de confirmación (no bloquea el resultado si falla)
-  if (slot?.start_time && data.management_token) {
+  if (slot?.start_time && managementToken) {
     try {
       await sendConfirmationEmail({
         clientName: input.clientName.trim(),
@@ -74,7 +76,7 @@ export async function createBooking(input: CreateBookingInput) {
         professionalName: professional?.name ?? "Tu profesional",
         serviceName: service.name,
         slotStartTime: slot.start_time,
-        managementToken: data.management_token,
+        managementToken,
       });
     } catch (emailError) {
       console.error("Error enviando email de confirmación:", emailError);
@@ -86,6 +88,7 @@ export async function createBooking(input: CreateBookingInput) {
     ok: true,
     bookingId: data.id,
     status: data.status as "CONFIRMED" | "PENDING",
+    managementToken,
   };
 }
 
