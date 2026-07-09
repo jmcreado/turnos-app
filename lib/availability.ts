@@ -155,3 +155,36 @@ export function computeBookableStarts(
 
   return result;
 }
+
+/**
+ * Dado un conjunto de slots atómicos ya filtrados (futuros, no bloqueados),
+ * devuelve la duración (en minutos) de la racha continua más larga.
+ * Sirve para advertir si un servicio de cierta duración nunca va a tener
+ * horarios reservables con la disponibilidad configurada actual.
+ */
+export function getMaxContiguousWindowMinutes(slots: SlotLike[]): number {
+  if (slots.length === 0) return 0;
+
+  const sorted = [...slots].sort(
+    (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+  );
+
+  let max = 0;
+  let runStart = new Date(sorted[0]!.start_time).getTime();
+  let runEnd = new Date(sorted[0]!.end_time).getTime();
+
+  for (let i = 1; i < sorted.length; i++) {
+    const startMs = new Date(sorted[i]!.start_time).getTime();
+    const endMs = new Date(sorted[i]!.end_time).getTime();
+    if (startMs === runEnd) {
+      runEnd = endMs;
+    } else {
+      max = Math.max(max, (runEnd - runStart) / 60000);
+      runStart = startMs;
+      runEnd = endMs;
+    }
+  }
+  max = Math.max(max, (runEnd - runStart) / 60000);
+
+  return max;
+}

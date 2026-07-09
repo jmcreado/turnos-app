@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getMaxContiguousWindowMinutes } from "@/lib/availability";
+import { AvailabilityConfigForm } from "../../availability/components/AvailabilityConfigForm";
 
 export default function NewServicePage() {
   const router = useRouter();
@@ -15,6 +17,53 @@ export default function NewServicePage() {
     price: 0,
     requires_payment: false,
   });
+
+  const [professionalId, setProfessionalId] = useState<string | null>(null);
+  const [loadingContext, setLoadingContext] = useState(true);
+  const [existingServicesCount, setExistingServicesCount] = useState(0);
+  const [hasAvailability, setHasAvailability] = useState(false);
+  const [maxWindowMinutes, setMaxWindowMinutes] = useState(0);
+
+  useEffect(() => {
+    async function loadContext() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push("/login"); return; }
+
+      const { data: professional } = await supabase
+        .from("professionals")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!professional) { setLoadingContext(false); return; }
+      setProfessionalId(professional.id);
+
+      const now = new Date().toISOString();
+      const [servicesRes, slotsRes] = await Promise.all([
+        supabase
+          .from("services")
+          .select("id", { count: "exact", head: true })
+          .eq("professional_id", professional.id)
+          .eq("is_active", true),
+        supabase
+          .from("availability_slots")
+          .select("id, start_time, end_time")
+          .eq("professional_id", professional.id)
+          .eq("is_blocked", false)
+          .gte("start_time", now),
+      ]);
+
+      setExistingServicesCount(servicesRes.count ?? 0);
+      const slots = slotsRes.data ?? [];
+      setHasAvailability(slots.length > 0);
+      setMaxWindowMinutes(getMaxContiguousWindowMinutes(slots));
+      setLoadingContext(false);
+    }
+    loadContext();
+  }, [router]);
+
+  const durationTooLong = hasAvailability && form.duration_minutes > maxWindowMinutes;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -54,13 +103,21 @@ export default function NewServicePage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 py-8">
-      <div className="mx-auto max-w-lg px-4">
+      <div className="mx-auto max-w-lg px-4 space-y-6">
         <div className="mb-6">
           <a href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-700">← Volver al dashboard</a>
         </div>
+
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h1 className="text-lg font-semibold text-zinc-900">Nuevo servicio</h1>
           <p className="mt-1 text-sm text-zinc-500">Configurá los detalles de tu servicio.</p>
+
+          {!loadingContext && existingServicesCount > 0 && (
+            <div className="mt-4 rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-3 text-sm text-zinc-600">
+              Ya tenés {existingServicesCount} servicio{existingServicesCount !== 1 ? "s" : ""} activo{existingServicesCount !== 1 ? "s" : ""}. Todos comparten el mismo calendario — un turno de cualquier servicio ocupa el horario para los demás.
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-zinc-700">Nombre del servicio *</label>
@@ -89,7 +146,7 @@ export default function NewServicePage() {
                 <input
                   type="number"
                   min={15}
-                  max={180}
+                  max={480}
                   step={15}
                   value={form.duration_minutes}
                   onChange={(e) => setForm((f) => ({ ...f, duration_minutes: Number(e.target.value) || 60 }))}
@@ -108,6 +165,13 @@ export default function NewServicePage() {
                 />
               </div>
             </div>
+
+            {durationTooLong && (
+              <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+                Tu disponibilidad configurada no tiene ningún bloque libre de {form.duration_minutes} minutos seguidos (el más largo es de {maxWindowMinutes} min). Este servicio no va a tener horarios para reservar hasta que ajustes tu disponibilidad más abajo.
+              </div>
+            )}
+
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
@@ -127,6 +191,22 @@ export default function NewServicePage() {
             </div>
           </form>
         </div>
+
+        {!loadingContext && !hasAvailability && professionalId && (
+          <div className="space-y-3">
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+              Todavía no configuraste tu disponibilidad semanal — sin esto, tu servicio no va a tener horarios para que los clientes reserven. Configurala acá abajo:
+            </div>
+            <AvailabilityConfigForm professionalId={professionalId} />
+          </div>
+        )}
+
+        {!loadingContext && hasAvailability && professionalId && (
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm flex items-center justify-between gap-3">
+            <p className="text-sm text-zinc-600">Tu bloque libre más largo hoy es de <strong>{maxWindowMinutes} min</strong>.</p>
+            <a href="/dashboard/availability" className="text-sm font-medium text-zinc-700 hover:text-zinc-900 whitespace-nowrap">Editar disponibilidad →</a>
+          </div>
+        )}
       </div>
     </div>
   );
