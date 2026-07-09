@@ -1,16 +1,18 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { generateSlotTimes, type WeeklyConfig } from "@/lib/availability";
+import { generateSlotTimes, SLOT_GRANULARITY_MINUTES, type WeeklyConfig } from "@/lib/availability";
 import { revalidatePath } from "next/cache";
 
 /**
  * Guarda la disponibilidad: elimina slots futuros sin reserva y crea los nuevos según la config.
+ * Los slots se generan en bloques atómicos de SLOT_GRANULARITY_MINUTES — la
+ * disponibilidad real para cada servicio (que puede tener otra duración) se
+ * calcula dinámicamente al momento de reservar (ver computeBookableStarts).
  */
 export async function saveAvailability(
   professionalId: string,
-  weeklyConfig: WeeklyConfig,
-  durationMinutes: number
+  weeklyConfig: WeeklyConfig
 ) {
   const supabase = await createClient();
   const now = new Date().toISOString();
@@ -35,8 +37,8 @@ export async function saveAvailability(
     await supabase.from("availability_slots").delete().eq("id", slot.id);
   }
 
-  // Generar nuevos slots
-  const slotTimes = generateSlotTimes(weeklyConfig, durationMinutes, 4);
+  // Generar nuevos slots (grano fino, no atados a la duración de un servicio)
+  const slotTimes = generateSlotTimes(weeklyConfig, SLOT_GRANULARITY_MINUTES, 4);
 
   if (slotTimes.length === 0) {
     revalidatePath("/dashboard/availability");

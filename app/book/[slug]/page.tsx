@@ -3,6 +3,7 @@
  */
 import { createClient } from "@/lib/supabase/server";
 import { getProfessionalBySlug, getProfessionalById } from "@/lib/professional";
+import { computeBookableStarts, type OccupiedRange } from "@/lib/availability";
 import { notFound } from "next/navigation";
 import { BookingCalendar } from "./BookingCalendar";
 
@@ -61,7 +62,7 @@ export default async function BookPage({ params, searchParams }: Props) {
 
     supabase
       .from("bookings")
-      .select("slot_id")
+      .select("slot_id, services(duration_minutes)")
       .eq("professional_id", professional.id)
       .in("status", ["CONFIRMED", "PENDING"]),
 
@@ -71,9 +72,38 @@ export default async function BookPage({ params, searchParams }: Props) {
       .eq("professional_id", professional.id),
   ]);
 
-  const allSlots = slotsRes.data ?? [];
+  const allAtomicSlots = slotsRes.data ?? [];
+  const slotsById = new Map(allAtomicSlots.map(s => [s.id, s]));
   const bookedSlotIds = new Set((bookedRes.data ?? []).map(r => r.slot_id));
   const waitlistSlotIds = new Set((waitlistRes.data ?? []).map(r => r.slot_id));
+
+  // Rangos realmente ocupados por turnos existentes (con la duración real de
+  // cada servicio, no el tamaño del slot atómico).
+  type BookedRow = { slot_id: string; services: { duration_minutes: number } | { duration_minutes: number }[] | null };
+  const occupiedRanges: OccupiedRange[] = [];
+  for (const raw of (bookedRes.data ?? []) as BookedRow[]) {
+    const startSlot = slotsById.get(raw.slot_id);
+    const serviceInfo = Array.isArray(raw.services) ? raw.services[0] : raw.services;
+    const durationMinutes = serviceInfo?.duration_minutes;
+    if (!startSlot || !durationMinutes) continue;
+    const startMs = new Date(startSlot.start_time).getTime();
+    occupiedRanges.push({
+      start: startSlot.start_time,
+      end: new Date(startMs + durationMinutes * 60 * 1000).toISOString(),
+    });
+  }
+
+  // Puntos de inicio válidos para el servicio seleccionado (calculado dinámicamente).
+  // La query ya trae solo slots con is_blocked = false.
+  const bookableStarts = selectedService
+    ? computeBookableStarts(allAtomicSlots, occupiedRanges, selectedService.duration_minutes)
+    : [];
+  const bookableStartIds = new Set(bookableStarts.map(s => s.id));
+
+  // El calendario del cliente necesita: los puntos de inicio reservables +
+  // los slots que ya son el inicio literal de un turno (para mostrarlos como
+  // "Ocupado" y permitir anotarse en lista de espera).
+  const allSlots = allAtomicSlots.filter(s => bookableStartIds.has(s.id) || bookedSlotIds.has(s.id));
 
   return (
     <div className="min-h-screen py-8" style={{ backgroundColor: "#f7f5f0" }}>

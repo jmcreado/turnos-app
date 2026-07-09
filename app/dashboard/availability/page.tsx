@@ -33,7 +33,7 @@ export default async function AvailabilityPage() {
 
     supabase
       .from("bookings")
-      .select("id, slot_id, client_name, client_email, client_phone, status, service_id, services(name)")
+      .select("id, slot_id, client_name, client_email, client_phone, status, service_id, services(name, duration_minutes)")
       .eq("professional_id", professional.id)
       .in("status", ["CONFIRMED", "PENDING"]),
 
@@ -50,19 +50,45 @@ export default async function AvailabilityPage() {
   ]);
 
   const slots = slotsRes.data ?? [];
+  const slotsById = new Map(slots.map(s => [s.id, s]));
 
-  // Map: slot_id → booking info
+  // Map: slot_id → booking info. Un turno puede abarcar varios slots atómicos
+  // (si su servicio dura más que la granularidad); marcamos todos los slots
+  // que caen dentro del rango real del turno, no solo el slot de inicio.
+  type BookingRow = {
+    id: string;
+    slot_id: string;
+    client_name: string;
+    client_email: string;
+    client_phone: string | null;
+    status: string;
+    services: { name: string; duration_minutes: number } | { name: string; duration_minutes: number }[] | null;
+  };
   const bookingsBySlot: Record<string, { id: string; client_name: string; client_email: string; client_phone: string | null; status: string; service_name: string | null }> = {};
-  for (const b of bookingsRes.data ?? []) {
-    const raw = b as any;
-    bookingsBySlot[raw.slot_id] = {
+  for (const raw of (bookingsRes.data ?? []) as BookingRow[]) {
+    const serviceInfo = Array.isArray(raw.services) ? raw.services[0] : raw.services;
+    const info = {
       id: raw.id,
       client_name: raw.client_name,
       client_email: raw.client_email,
       client_phone: raw.client_phone ?? null,
       status: raw.status,
-      service_name: Array.isArray(raw.services) ? (raw.services[0]?.name ?? null) : (raw.services?.name ?? null),
+      service_name: serviceInfo?.name ?? null,
     };
+
+    const startSlot = slotsById.get(raw.slot_id);
+    const durationMinutes = serviceInfo?.duration_minutes;
+    if (startSlot && durationMinutes) {
+      const startMs = new Date(startSlot.start_time).getTime();
+      const endMs = startMs + durationMinutes * 60 * 1000;
+      for (const s of slots) {
+        const sMs = new Date(s.start_time).getTime();
+        if (sMs >= startMs && sMs < endMs) bookingsBySlot[s.id] = info;
+      }
+    } else {
+      // Fallback si no encontramos el slot o el servicio: marcar solo el de inicio
+      bookingsBySlot[raw.slot_id] = info;
+    }
   }
 
   // Map: slot_id → first waitlist entry
@@ -84,7 +110,6 @@ export default async function AvailabilityPage() {
 
         <AvailabilityConfigForm
           professionalId={professional.id}
-          durationMinutes={professional.session_duration_minutes}
         />
 
         <SlotsCalendar

@@ -3,6 +3,14 @@
  * Días: 0 = Lunes, 6 = Domingo (orden español).
  */
 
+/**
+ * Granularidad atómica de los slots generados. Los servicios pueden tener
+ * cualquier duración (múltiplo de esto, idealmente); la disponibilidad real
+ * para cada servicio se calcula dinámicamente con `computeBookableStarts`,
+ * buscando rachas continuas y libres de slots atómicos.
+ */
+export const SLOT_GRANULARITY_MINUTES = 15;
+
 export const WEEKDAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"] as const;
 
 export type WeekdayConfig = {
@@ -71,4 +79,79 @@ export function defaultWeeklyConfig(): WeeklyConfig {
     startTime: "09:00",
     endTime: "18:00",
   }));
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Cálculo dinámico de disponibilidad por servicio
+// ────────────────────────────────────────────────────────────────────────────
+
+export type SlotLike = { id: string; start_time: string; end_time: string; is_blocked?: boolean };
+
+/** Rango de tiempo ya ocupado por un turno existente (inicio + duración real del servicio). */
+export type OccupiedRange = { start: string; end: string };
+
+/**
+ * Dados los slots atómicos de un profesional (grano fino, ej. 15 min) y los
+ * rangos ya ocupados por turnos existentes (con la duración real de cada
+ * servicio, no el tamaño del slot), calcula qué slots son puntos de inicio
+ * válidos para un turno nuevo de `serviceDurationMinutes`.
+ *
+ * No asume que los slots ya vienen en el grano correcto para el servicio:
+ * busca rachas continuas (slot[i].end_time === slot[i+1].start_time) que no
+ * estén bloqueadas ni se crucen con ningún rango ocupado, y devuelve los
+ * slots de esa racha desde los que alcanza el tiempo para completar la
+ * duración pedida.
+ */
+export function computeBookableStarts(
+  slots: SlotLike[],
+  occupiedRanges: OccupiedRange[],
+  serviceDurationMinutes: number
+): SlotLike[] {
+  const sorted = [...slots].sort(
+    (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+  );
+
+  const occupied = occupiedRanges
+    .map(r => ({ start: new Date(r.start).getTime(), end: new Date(r.end).getTime() }))
+    .sort((a, b) => a.start - b.start);
+
+  function overlapsOccupied(startMs: number, endMs: number): boolean {
+    return occupied.some(o => startMs < o.end && endMs > o.start);
+  }
+
+  const durationMs = serviceDurationMinutes * 60 * 1000;
+  const result: SlotLike[] = [];
+
+  for (let i = 0; i < sorted.length; i++) {
+    const slot = sorted[i]!;
+    if (slot.is_blocked) continue;
+
+    const startMs = new Date(slot.start_time).getTime();
+    const neededEndMs = startMs + durationMs;
+
+    // Verificar que exista una racha continua y libre desde `slot` hasta cubrir la duración
+    let coveredUntil = new Date(slot.end_time).getTime();
+    let ok = !overlapsOccupied(startMs, Math.min(coveredUntil, neededEndMs));
+    let j = i;
+    while (ok && coveredUntil < neededEndMs) {
+      const next = sorted[j + 1];
+      if (!next || next.is_blocked || new Date(next.start_time).getTime() !== coveredUntil) {
+        ok = false;
+        break;
+      }
+      const nextEndMs = new Date(next.end_time).getTime();
+      if (overlapsOccupied(coveredUntil, Math.min(nextEndMs, neededEndMs))) {
+        ok = false;
+        break;
+      }
+      coveredUntil = nextEndMs;
+      j++;
+    }
+
+    if (ok && coveredUntil >= neededEndMs) {
+      result.push(slot);
+    }
+  }
+
+  return result;
 }

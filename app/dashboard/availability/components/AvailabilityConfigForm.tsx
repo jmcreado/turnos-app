@@ -7,12 +7,10 @@ import { useState } from "react";
 
 type Props = {
   professionalId: string;
-  durationMinutes: number;
 };
 
 export function AvailabilityConfigForm({
   professionalId,
-  durationMinutes,
 }: Props) {
   const router = useRouter();
   const [config, setConfig] = useState<WeeklyConfig>(defaultWeeklyConfig());
@@ -31,7 +29,7 @@ export function AvailabilityConfigForm({
     e.preventDefault();
     setMessage(null);
     setLoading(true);
-    const result = await saveAvailability(professionalId, config, durationMinutes);
+    const result = await saveAvailability(professionalId, config);
     setLoading(false);
     if (result.ok) {
       setMessage({
@@ -48,7 +46,7 @@ export function AvailabilityConfigForm({
     <form onSubmit={handleSubmit} className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold text-zinc-900">Configuración semanal</h2>
       <p className="mt-1 text-sm text-zinc-500">
-        Elegí los días y horarios en que atendés. Los slots son de {durationMinutes} minutos.
+        Elegí los días y horarios en que atendés. Los horarios disponibles para reservar se calculan según la duración de cada servicio.
       </p>
 
       <div className="mt-6 space-y-4">
