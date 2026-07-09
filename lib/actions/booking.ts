@@ -94,8 +94,12 @@ export async function createBooking(input: CreateBookingInput) {
 
 /**
  * Cancela un turno desde el dashboard del profesional.
+ * Acepta professionalId como segundo argumento opcional (para compatibilidad con SlotsCalendar).
  */
-export async function cancelBookingByProfessional(bookingId: string) {
+export async function cancelBookingByProfessional(
+  bookingId: string,
+  _professionalId?: string
+) {
   const supabase = await createClient();
 
   const { error } = await supabase
