@@ -37,3 +37,4 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 // test 1783795740
 // retest 1783796715
 // test new project 1783798533
+// test after full reinstall 1783798860
