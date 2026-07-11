@@ -5,19 +5,20 @@ import { WEEKDAY_LABELS, defaultWeeklyConfig, type WeeklyConfig } from "@/lib/av
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+type Service = { id: string; name: string };
+
 type Props = {
   professionalId: string;
+  services: Service[];
 };
 
-export function AvailabilityConfigForm({
-  professionalId,
-}: Props) {
+export function AvailabilityConfigForm({ professionalId, services }: Props) {
   const router = useRouter();
   const [config, setConfig] = useState<WeeklyConfig>(defaultWeeklyConfig());
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
 
-  function updateDay(index: number, patch: Partial<{ active: boolean; startTime: string; endTime: string }>) {
+  function updateDay(index: number, patch: Partial<{ active: boolean; startTime: string; endTime: string; serviceId: string | null }>) {
     setConfig((prev) => {
       const next = [...prev];
       next[index] = { ...next[index]!, ...patch };
@@ -32,10 +33,7 @@ export function AvailabilityConfigForm({
     const result = await saveAvailability(professionalId, config);
     setLoading(false);
     if (result.ok) {
-      setMessage({
-        type: "ok",
-        text: `Se guardó la disponibilidad. Se generaron ${result.count} slots para las próximas 4 semanas.`,
-      });
+      setMessage({ type: "ok", text: `Disponibilidad guardada. Se generaron ${result.count} slots para las próximas 4 semanas.` });
       router.refresh();
     } else {
       setMessage({ type: "error", text: result.error ?? "Error al guardar." });
@@ -46,24 +44,22 @@ export function AvailabilityConfigForm({
     <form onSubmit={handleSubmit} className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold text-zinc-900">Configuración semanal</h2>
       <p className="mt-1 text-sm text-zinc-500">
-        Elegí los días y horarios en que atendés. Los horarios disponibles para reservar se calculan según la duración de cada servicio.
+        Elegí los días, horarios y —opcionalmente— qué servicio aplica cada día.
       </p>
 
       <div className="mt-6 space-y-4">
         {WEEKDAY_LABELS.map((label, i) => (
-          <div
-            key={label}
-            className="flex flex-wrap items-center gap-4 rounded-lg border border-zinc-100 bg-zinc-50/50 p-4"
-          >
+          <div key={label} className="flex flex-wrap items-center gap-4 rounded-lg border border-zinc-100 bg-zinc-50/50 p-4">
             <label className="flex w-12 items-center gap-2 font-medium text-zinc-700">
               <input
                 type="checkbox"
                 checked={config[i]!.active}
                 onChange={(e) => updateDay(i, { active: e.target.checked })}
-                className="h-4 w-4 rounded border-zinc-300 text-zinc-900"
+                className="h-4 w-4 rounded border-zinc-300"
               />
               {label}
             </label>
+
             {config[i]!.active && (
               <>
                 <div className="flex items-center gap-2">
@@ -84,6 +80,22 @@ export function AvailabilityConfigForm({
                     className="rounded border border-zinc-300 px-3 py-1.5 text-sm"
                   />
                 </div>
+
+                {services.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-zinc-500">Servicio</span>
+                    <select
+                      value={config[i]!.serviceId ?? ""}
+                      onChange={(e) => updateDay(i, { serviceId: e.target.value || null })}
+                      className="rounded border border-zinc-300 px-3 py-1.5 text-sm bg-white"
+                    >
+                      <option value="">Todos los servicios</option>
+                      {services.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -91,10 +103,7 @@ export function AvailabilityConfigForm({
       </div>
 
       {message && (
-        <p
-          className={`mt-4 text-sm ${message.type === "ok" ? "text-emerald-600" : "text-red-600"}`}
-          role="alert"
-        >
+        <p className={`mt-4 text-sm ${message.type === "ok" ? "text-emerald-600" : "text-red-600"}`} role="alert">
           {message.text}
         </p>
       )}
