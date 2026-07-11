@@ -4,7 +4,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getProfessionalForUser } from "@/lib/professional";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { AvailabilityConfigForm } from "./components/AvailabilityConfigForm";
 import { SlotsCalendar } from "./components/SlotsCalendar";
 import type { SlotWaitlist } from "@/types/database";
@@ -51,23 +50,22 @@ export default async function AvailabilityPage() {
 
   const slots = slotsRes.data ?? [];
   const slotsById = new Map(slots.map(s => [s.id, s]));
+  const services = servicesRes.data ?? [];
 
-  // Map: slot_id → booking info. Un turno puede abarcar varios slots atómicos
-  // (si su servicio dura más que la granularidad); marcamos todos los slots
-  // que caen dentro del rango real del turno, no solo el slot de inicio.
   type BookingRow = {
-    id: string;
-    slot_id: string;
-    client_name: string;
-    client_email: string;
-    client_phone: string | null;
-    status: string;
+    id: string; slot_id: string; client_name: string; client_email: string;
+    client_phone: string | null; status: string;
     services: { name: string; duration_minutes: number } | { name: string; duration_minutes: number }[] | null;
   };
-  const bookingsBySlot: Record<string, { id: string; client_name: string; client_email: string; client_phone: string | null; status: string; service_name: string | null }> = {};
+
+  const bookingsBySlot: Record<string, {
+    id: string; client_name: string; client_email: string;
+    client_phone: string | null; status: string; service_name: string | null;
+  }> = {};
+
   for (const raw of (bookingsRes.data ?? []) as BookingRow[]) {
     const serviceInfo = Array.isArray(raw.services) ? raw.services[0] : raw.services;
-    const info = {
+    bookingsBySlot[raw.slot_id] = {
       id: raw.id,
       client_name: raw.client_name,
       client_email: raw.client_email,
@@ -75,50 +73,31 @@ export default async function AvailabilityPage() {
       status: raw.status,
       service_name: serviceInfo?.name ?? null,
     };
-
-    const startSlot = slotsById.get(raw.slot_id);
-    const durationMinutes = serviceInfo?.duration_minutes;
-    if (startSlot && durationMinutes) {
-      const startMs = new Date(startSlot.start_time).getTime();
-      const endMs = startMs + durationMinutes * 60 * 1000;
-      for (const s of slots) {
-        const sMs = new Date(s.start_time).getTime();
-        if (sMs >= startMs && sMs < endMs) bookingsBySlot[s.id] = info;
-      }
-    } else {
-      // Fallback si no encontramos el slot o el servicio: marcar solo el de inicio
-      bookingsBySlot[raw.slot_id] = info;
-    }
   }
 
-  // Map: slot_id → first waitlist entry
-  const waitlistBySlot: Record<string, SlotWaitlist> = {};
-  for (const w of waitlistRes.data ?? []) {
-    if (!waitlistBySlot[w.slot_id]) {
-      waitlistBySlot[w.slot_id] = w as SlotWaitlist;
-    }
+  const waitlistBySlot: Record<string, SlotWaitlist[]> = {};
+  for (const entry of (waitlistRes.data ?? []) as SlotWaitlist[]) {
+    if (!waitlistBySlot[entry.slot_id]) waitlistBySlot[entry.slot_id] = [];
+    waitlistBySlot[entry.slot_id]!.push(entry);
   }
 
   return (
-    <div className="min-h-screen py-8" style={{ backgroundColor: "#f7f5f0" }}>
-      <div className="mx-auto max-w-4xl space-y-8 px-4">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-sm font-medium text-zinc-600 hover:text-zinc-900">← Volver al dashboard</Link>
-        </div>
-
+    <div className="space-y-8">
+      <div>
         <h1 className="text-2xl font-semibold text-zinc-900">Disponibilidad</h1>
-
-        <AvailabilityConfigForm
-          professionalId={professional.id}
-        />
-
-        <SlotsCalendar
-          professionalId={professional.id}
-          slots={slots}
-          bookingsBySlot={bookingsBySlot}
-          waitlistBySlot={waitlistBySlot}
-        />
+        <p className="mt-1 text-sm text-zinc-500">
+          Configurá tu agenda y gestioná tus turnos disponibles.
+        </p>
       </div>
+
+      <AvailabilityConfigForm professionalId={professional.id} services={services} />
+
+      <SlotsCalendar
+        slots={slots}
+        bookingsBySlot={bookingsBySlot}
+        waitlistBySlot={waitlistBySlot}
+        professionalId={professional.id}
+      />
     </div>
   );
 }
