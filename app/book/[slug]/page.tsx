@@ -58,6 +58,8 @@ export default async function BookPage({ params, searchParams }: Props) {
       .eq("is_blocked", false)
       .gte("start_time", now)
       .lte("start_time", endIso)
+      // Filtrar por servicio: mostrar slots sin restricción O restringidos a este servicio
+      .or(`service_id.is.null,service_id.eq.${selectedService.id}`)
       .order("start_time", { ascending: true }),
 
     supabase
@@ -77,8 +79,6 @@ export default async function BookPage({ params, searchParams }: Props) {
   const bookedSlotIds = new Set((bookedRes.data ?? []).map(r => r.slot_id));
   const waitlistSlotIds = new Set((waitlistRes.data ?? []).map(r => r.slot_id));
 
-  // Rangos realmente ocupados por turnos existentes (con la duración real de
-  // cada servicio, no el tamaño del slot atómico).
   type BookedRow = { slot_id: string; services: { duration_minutes: number } | { duration_minutes: number }[] | null };
   const occupiedRanges: OccupiedRange[] = [];
   for (const raw of (bookedRes.data ?? []) as BookedRow[]) {
@@ -93,64 +93,22 @@ export default async function BookPage({ params, searchParams }: Props) {
     });
   }
 
-  // Puntos de inicio válidos para el servicio seleccionado (calculado dinámicamente).
-  // La query ya trae solo slots con is_blocked = false.
   const bookableStarts = selectedService
     ? computeBookableStarts(allAtomicSlots, occupiedRanges, selectedService.duration_minutes)
     : [];
   const bookableStartIds = new Set(bookableStarts.map(s => s.id));
 
-  // El calendario del cliente necesita: los puntos de inicio reservables +
-  // los slots que ya son el inicio literal de un turno (para mostrarlos como
-  // "Ocupado" y permitir anotarse en lista de espera).
-  const allSlots = allAtomicSlots.filter(s => bookableStartIds.has(s.id) || bookedSlotIds.has(s.id));
+  const filteredSlots = allAtomicSlots.filter(s => bookableStartIds.has(s.id) || bookedSlotIds.has(s.id) || waitlistSlotIds.has(s.id));
 
   return (
-    <div className="min-h-screen py-8" style={{ backgroundColor: "#f7f5f0" }}>
-      <div className="mx-auto max-w-lg px-4 space-y-4">
-        {/* Professional header */}
-        <div className="rounded-2xl p-5" style={{ backgroundColor: "#e8f2ed" }}>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg" style={{ backgroundColor: "#1a6b4a" }}>
-              {professional.name.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h1 className="font-bold text-zinc-900">{professional.name}</h1>
-            </div>
-          </div>
-
-          {activeServices.length > 1 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {activeServices.map(s => (
-                <a key={s.id} href={`/book/${slug}?service=${s.id}`} className="rounded-full px-4 py-1.5 text-sm font-medium transition-colors" style={s.id === selectedService.id ? { backgroundColor: "#1a6b4a", color: "white" } : { border: "1px solid #d1d5db", color: "#4b5563" }}>{s.name}</a>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-4 rounded-xl bg-white p-4">
-            <p className="font-medium text-zinc-900">{selectedService.name}</p>
-            {selectedService.description && <p className="mt-1 text-sm text-zinc-500">{selectedService.description}</p>}
-            <dl className="mt-3 flex flex-wrap gap-4 text-sm">
-              <div>
-                <dt className="text-zinc-500">Duración</dt>
-                <dd className="font-medium text-zinc-900">{selectedService.duration_minutes} min</dd>
-              </div>
-              <div>
-                <dt className="text-zinc-500">Precio</dt>
-                <dd className="font-medium text-zinc-900">${Number(selectedService.price).toLocaleString("es-AR")} ARS</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-
-        <BookingCalendar
-          professional={professional}
-          allSlots={allSlots}
-          bookedSlotIds={Array.from(bookedSlotIds)}
-          waitlistSlotIds={Array.from(waitlistSlotIds)}
-          serviceId={selectedService.id}
-        />
-      </div>
+    <div className="min-h-screen" style={{ backgroundColor: "#f7f5f0" }}>
+      <BookingCalendar
+        professional={professional}
+        allSlots={filteredSlots}
+        bookedSlotIds={Array.from(bookedSlotIds)}
+        waitlistSlotIds={Array.from(waitlistSlotIds)}
+        serviceId={selectedService.id}
+      />
     </div>
   );
 }
