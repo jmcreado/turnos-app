@@ -4,12 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { generateSlotTimes, SLOT_GRANULARITY_MINUTES, type WeeklyConfig } from "@/lib/availability";
 import { revalidatePath } from "next/cache";
 
-/**
- * Guarda la disponibilidad: elimina slots futuros sin reserva y crea los nuevos según la config.
- * Los slots se generan en bloques atómicos de SLOT_GRANULARITY_MINUTES — la
- * disponibilidad real para cada servicio (que puede tener otra duración) se
- * calcula dinámicamente al momento de reservar (ver computeBookableStarts).
- */
 export async function saveAvailability(
   professionalId: string,
   weeklyConfig: WeeklyConfig
@@ -17,7 +11,6 @@ export async function saveAvailability(
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  // Slots que tienen alguna reserva (CONFIRMED o PENDING) no se tocan
   const { data: bookedSlots } = await supabase
     .from("bookings")
     .select("slot_id")
@@ -25,7 +18,6 @@ export async function saveAvailability(
 
   const bookedSlotIds = new Set((bookedSlots ?? []).map((r) => r.slot_id));
 
-  // Borrar slots futuros de este profesional que no estén reservados
   const { data: futureSlots } = await supabase
     .from("availability_slots")
     .select("id")
@@ -37,34 +29,39 @@ export async function saveAvailability(
     await supabase.from("availability_slots").delete().eq("id", slot.id);
   }
 
-  // Generar nuevos slots (grano fino, no atados a la duración de un servicio)
-  const slotTimes = generateSlotTimes(weeklyConfig, SLOT_GRANULARITY_MINUTES, 4);
+  // Generar slots por día para poder asignar service_id correctamente
+  let totalCount = 0;
 
-  if (slotTimes.length === 0) {
-    revalidatePath("/dashboard/availability");
-    return { ok: true, count: 0 };
-  }
+  for (let dayIndex = 0; dayIndex < weeklyConfig.length; dayIndex++) {
+    const dayConfig = weeklyConfig[dayIndex];
+    if (!dayConfig?.active) continue;
 
-  const rows = slotTimes.map(({ start, end }) => ({
-    professional_id: professionalId,
-    start_time: start,
-    end_time: end,
-    is_blocked: false,
-  }));
+    // Config con solo este día activo para generar sus slots
+    const singleDayConfig = weeklyConfig.map((d, i) =>
+      i === dayIndex ? d : { ...d, active: false }
+    );
 
-  const { error } = await supabase.from("availability_slots").insert(rows);
+    const slotTimes = generateSlotTimes(singleDayConfig, SLOT_GRANULARITY_MINUTES, 4);
+    if (slotTimes.length === 0) continue;
 
-  if (error) {
-    return { ok: false, error: error.message };
+    const rows = slotTimes.map(({ start, end }) => ({
+      professional_id: professionalId,
+      start_time: start,
+      end_time: end,
+      is_blocked: false,
+      service_id: dayConfig.serviceId ?? null,
+    }));
+
+    const { error } = await supabase.from("availability_slots").insert(rows);
+    if (error) return { ok: false, error: error.message };
+
+    totalCount += rows.length;
   }
 
   revalidatePath("/dashboard/availability");
-  return { ok: true, count: rows.length };
+  return { ok: true, count: totalCount };
 }
 
-/**
- * Marca un slot como bloqueado (solo si no tiene reserva confirmada/pendiente).
- */
 export async function blockSlot(slotId: string, professionalId: string) {
   const supabase = await createClient();
 
@@ -75,9 +72,7 @@ export async function blockSlot(slotId: string, professionalId: string) {
     .in("status", ["CONFIRMED", "PENDING"])
     .maybeSingle();
 
-  if (booking) {
-    return { ok: false, error: "No se puede bloquear un slot con reserva activa." };
-  }
+  if (booking) return { ok: false, error: "No se puede bloquear un slot con reserva activa." };
 
   const { error } = await supabase
     .from("availability_slots")
@@ -85,17 +80,12 @@ export async function blockSlot(slotId: string, professionalId: string) {
     .eq("id", slotId)
     .eq("professional_id", professionalId);
 
-  if (error) {
-    return { ok: false, error: error.message };
-  }
+  if (error) return { ok: false, error: error.message };
 
   revalidatePath("/dashboard/availability");
   return { ok: true };
 }
 
-/**
- * Desbloquea un slot.
- */
 export async function unblockSlot(slotId: string, professionalId: string) {
   const supabase = await createClient();
 
@@ -105,9 +95,7 @@ export async function unblockSlot(slotId: string, professionalId: string) {
     .eq("id", slotId)
     .eq("professional_id", professionalId);
 
-  if (error) {
-    return { ok: false, error: error.message };
-  }
+  if (error) return { ok: false, error: error.message };
 
   revalidatePath("/dashboard/availability");
   return { ok: true };
