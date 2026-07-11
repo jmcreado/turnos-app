@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { sendConfirmationEmail } from "@/lib/email";
+import { notifyFirstWaitlistEntry } from "@/lib/actions/waitlist";
 import { revalidatePath } from "next/cache";
 
 type CreateBookingInput = {
@@ -93,11 +94,42 @@ export async function cancelBookingByProfessional(
   _professionalId?: string
 ) {
   const supabase = await createClient();
+
+  // Obtener info del booking para notificar waitlist
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select(`
+      slot_id, service_id,
+      availability_slots(start_time),
+      services(name),
+      professionals(name, slug)
+    `)
+    .eq("id", bookingId)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("bookings")
     .update({ status: "CANCELLED" })
     .eq("id", bookingId);
+
   if (error) return { ok: false, error: error.message };
+
+  // Notificar waitlist si hay alguien esperando
+  if (booking) {
+    const slotArr = booking.availability_slots as unknown as Array<{ start_time: string }>;
+    const serviceArr = booking.services as unknown as Array<{ name: string }>;
+    const profArr = booking.professionals as unknown as Array<{ name: string; slug: string | null }>;
+
+    await notifyFirstWaitlistEntry({
+      slotId: booking.slot_id,
+      slotStartTime: slotArr?.[0]?.start_time ?? "",
+      professionalSlug: profArr?.[0]?.slug ?? null,
+      professionalName: profArr?.[0]?.name ?? "",
+      serviceName: serviceArr?.[0]?.name ?? "",
+      serviceId: booking.service_id ?? null,
+    }).catch(console.error);
+  }
+
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/availability");
   return { ok: true };
@@ -111,7 +143,12 @@ export async function cancelBookingByToken(token: string) {
 
   const { data: booking } = await supabase
     .from("bookings")
-    .select("id, status, availability_slots(start_time)")
+    .select(`
+      id, status, slot_id, service_id,
+      availability_slots(start_time),
+      services(name),
+      professionals(name, slug)
+    `)
     .eq("management_token", token)
     .maybeSingle();
 
@@ -130,6 +167,20 @@ export async function cancelBookingByToken(token: string) {
     .eq("id", booking.id);
 
   if (error) return { ok: false, error: error.message };
+
+  // Notificar waitlist
+  const serviceArr = booking.services as unknown as Array<{ name: string }>;
+  const profArr = booking.professionals as unknown as Array<{ name: string; slug: string | null }>;
+
+  await notifyFirstWaitlistEntry({
+    slotId: booking.slot_id,
+    slotStartTime: startTime ?? "",
+    professionalSlug: profArr?.[0]?.slug ?? null,
+    professionalName: profArr?.[0]?.name ?? "",
+    serviceName: serviceArr?.[0]?.name ?? "",
+    serviceId: booking.service_id ?? null,
+  }).catch(console.error);
+
   return { ok: true };
 }
 
