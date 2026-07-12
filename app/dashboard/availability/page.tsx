@@ -75,10 +75,9 @@ export default async function AvailabilityPage() {
     };
   }
 
-  const waitlistBySlot: Record<string, SlotWaitlist[]> = {};
+  const waitlistBySlot: Record<string, SlotWaitlist> = {};
   for (const entry of (waitlistRes.data ?? []) as SlotWaitlist[]) {
-    if (!waitlistBySlot[entry.slot_id]) waitlistBySlot[entry.slot_id] = [];
-    waitlistBySlot[entry.slot_id]!.push(entry);
+    waitlistBySlot[entry.slot_id] = entry;
   }
 
   return (
