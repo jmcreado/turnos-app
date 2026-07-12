@@ -62,6 +62,7 @@ export default function LandingPage() {
         .nav-links { display: flex; gap: 20px; }
         .theme-toggle { background: none; border: 1px solid var(--border); border-radius: 100px; width: 34px; height: 34px; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; }
         .nav-cta { background: var(--green); color: var(--on-accent) !important; padding: 9px 16px; border-radius: 100px; font-size: 13px !important; font-weight: 500; white-space: nowrap; }
+        .nav-login { font-size: 14px; color: var(--ink-soft); text-decoration: none; white-space: nowrap; }
 
         .hero { max-width: 720px; margin: 0 auto; padding: 56px 24px 48px; text-align: center; }
         .hero-label { display: inline-block; background: var(--green-light); color: var(--green); font-size: 13px; font-weight: 500; padding: 4px 14px; border-radius: 100px; margin-bottom: 22px; }
@@ -103,6 +104,7 @@ export default function LandingPage() {
         @media (max-width: 640px) {
           nav { padding: 14px 16px; }
           .nav-links { display: none; }
+          .nav-login { display: none; }
           .hero { padding: 40px 16px 36px; }
           .steps { margin-top: 44px; padding: 0 16px; }
           .features { margin: 48px auto; padding: 0 16px; }
@@ -119,6 +121,7 @@ export default function LandingPage() {
             <li><a href="#features">Features</a></li>
           </ul>
           <ThemeToggle />
+          <a href="/login" className="nav-login">Iniciar sesión</a>
           <a href="/login" className="nav-cta">Empezar gratis</a>
         </div>
       </nav>
