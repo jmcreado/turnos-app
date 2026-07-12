@@ -20,7 +20,7 @@ export default function NewServicePage() {
 
   const [professionalId, setProfessionalId] = useState<string | null>(null);
   const [loadingContext, setLoadingContext] = useState(true);
-  const [existingServicesCount, setExistingServicesCount] = useState(0);
+  const [services, setServices] = useState<{ id: string; name: string }[]>([]);
   const [hasAvailability, setHasAvailability] = useState(false);
   const [maxWindowMinutes, setMaxWindowMinutes] = useState(0);
 
@@ -43,7 +43,7 @@ export default function NewServicePage() {
       const [servicesRes, slotsRes] = await Promise.all([
         supabase
           .from("services")
-          .select("id", { count: "exact", head: true })
+          .select("id, name")
           .eq("professional_id", professional.id)
           .eq("is_active", true),
         supabase
@@ -54,7 +54,7 @@ export default function NewServicePage() {
           .gte("start_time", now),
       ]);
 
-      setExistingServicesCount(servicesRes.count ?? 0);
+      setServices(servicesRes.data ?? []);
       const slots = slotsRes.data ?? [];
       setHasAvailability(slots.length > 0);
       setMaxWindowMinutes(getMaxContiguousWindowMinutes(slots));
@@ -63,7 +63,9 @@ export default function NewServicePage() {
     loadContext();
   }, [router]);
 
+  const existingServicesCount = services.length;
   const durationTooLong = hasAvailability && form.duration_minutes > maxWindowMinutes;
+  const canSubmit = !loading && !loadingContext && hasAvailability;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -183,8 +185,20 @@ export default function NewServicePage() {
               <label htmlFor="requires_payment" className="text-sm text-zinc-700">Requiero pago previo para confirmar el turno</label>
             </div>
             {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+
+            {!loadingContext && !hasAvailability && (
+              <p className="text-sm text-amber-700">
+                Para crear el servicio primero necesitás configurar tu disponibilidad semanal (más abajo).
+              </p>
+            )}
+
             <div className="flex gap-3 pt-2">
-              <button type="submit" disabled={loading} className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50">
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                title={!hasAvailability ? "Configurá tu disponibilidad semanal antes de crear el servicio" : undefined}
+                className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
                 {loading ? "Guardando…" : "Crear servicio"}
               </button>
               <a href="/dashboard" className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Cancelar</a>
@@ -197,7 +211,7 @@ export default function NewServicePage() {
             <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
               Todavía no configuraste tu disponibilidad semanal — sin esto, tu servicio no va a tener horarios para que los clientes reserven. Configurala acá abajo:
             </div>
-            <AvailabilityConfigForm professionalId={professionalId} />
+            <AvailabilityConfigForm professionalId={professionalId} services={services} />
           </div>
         )}
 
