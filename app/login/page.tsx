@@ -6,7 +6,15 @@ import { createBrowserClient } from '@supabase/ssr'
 
 type Mode = 'login' | 'signup' | 'magic'
 
-const G = { green: '#1a6b4a', cream: '#f7f5f0' }
+const C = {
+  ink: '#f5f5f4',
+  muted: '#8b8b88',
+  faint: '#55554f',
+  accent: '#8ef0b8',
+  surface: '#141414',
+  edge: 'rgba(255,255,255,0.09)',
+  danger: '#f0a08e',
+}
 
 function LoginForm() {
   const searchParams = useSearchParams()
@@ -89,110 +97,101 @@ function LoginForm() {
     setLoading(false)
   }
 
-  const inputStyle = {
-    width: '100%',
-    padding: '12px 14px',
-    fontSize: '15px',
-    border: '1.5px solid #e0ddd6',
-    borderRadius: '8px',
-    backgroundColor: '#faf9f7',
-    color: '#0f0f0f',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-  }
+  const labelStyle = { display: 'block', fontSize: '14px', fontWeight: 500, color: C.ink, marginBottom: '6px' } as const
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: G.cream, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'DM Sans, sans-serif' }}>
-      <a href="/" style={{ marginBottom: '48px', textDecoration: 'none' }}>
-        <span style={{ fontFamily: 'DM Serif Display, serif', fontSize: '28px', color: '#0f0f0f', letterSpacing: '-0.5px' }}>Tor<span style={{ color: G.green }}>nu</span></span>
+    <div className="tn-glow" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <a href="/" style={{ marginBottom: '44px', textDecoration: 'none' }}>
+        <span style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 600, color: C.ink, letterSpacing: '-0.5px' }}>Tor<span style={{ color: C.accent }}>nu</span></span>
       </a>
-      <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#ffffff', borderRadius: '16px', padding: '40px', boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)' }}>
+      <div className="tn-card" style={{ width: '100%', maxWidth: '400px', padding: '40px' }}>
         {authError && (
-          <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px 16px', marginBottom: '24px', color: '#dc2626', fontSize: '14px' }}>
+          <div style={{ backgroundColor: 'rgba(240,160,142,0.1)', border: '1px solid rgba(240,160,142,0.3)', borderRadius: '10px', padding: '12px 16px', marginBottom: '24px', color: C.danger, fontSize: '14px' }}>
             El link expiró o no es válido. Solicitá uno nuevo.
           </div>
         )}
 
         {magicSent ? (
           <div style={{ textAlign: 'center' }}>
-            <div style={{ width: '48px', height: '48px', backgroundColor: '#e8f2ed', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+            <div style={{ width: '48px', height: '48px', backgroundColor: 'rgba(142,240,184,0.1)', border: '1px solid rgba(142,240,184,0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
-            <h2 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '22px', color: '#0f0f0f', marginBottom: '8px' }}>Revisá tu correo</h2>
-            <p style={{ color: '#4a4a4a', fontSize: '15px', lineHeight: '1.5' }}>Te enviamos un link de acceso a <strong>{email}</strong>. Expira en 1 hora.</p>
-            <button onClick={() => { setMagicSent(false); setMode('login') }} style={{ marginTop: '24px', color: G.green, background: 'none', border: 'none', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}>Volver</button>
+            <h2 style={{ fontSize: '22px', fontWeight: 600, color: C.ink, marginBottom: '8px', letterSpacing: '-0.02em' }}>Revisá tu correo</h2>
+            <p style={{ color: C.muted, fontSize: '15px', lineHeight: '1.5' }}>Te enviamos un link de acceso a <strong style={{ color: C.ink }}>{email}</strong>. Expira en 1 hora.</p>
+            <button onClick={() => { setMagicSent(false); setMode('login') }} style={{ marginTop: '24px', color: C.accent, background: 'none', border: 'none', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}>Volver</button>
           </div>
         ) : signupConfirmSent ? (
           <div style={{ textAlign: 'center' }}>
-            <div style={{ width: '48px', height: '48px', backgroundColor: '#e8f2ed', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={G.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+            <div style={{ width: '48px', height: '48px', backgroundColor: 'rgba(142,240,184,0.1)', border: '1px solid rgba(142,240,184,0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
-            <h2 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '22px', color: '#0f0f0f', marginBottom: '8px' }}>Confirmá tu cuenta</h2>
-            <p style={{ color: '#4a4a4a', fontSize: '15px', lineHeight: '1.5' }}>Te enviamos un email a <strong>{email}</strong> para confirmar tu cuenta. Después ya podés iniciar sesión con tu contraseña.</p>
-            <button onClick={() => { setSignupConfirmSent(false); setMode('login') }} style={{ marginTop: '24px', color: G.green, background: 'none', border: 'none', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}>Volver</button>
+            <h2 style={{ fontSize: '22px', fontWeight: 600, color: C.ink, marginBottom: '8px', letterSpacing: '-0.02em' }}>Confirmá tu cuenta</h2>
+            <p style={{ color: C.muted, fontSize: '15px', lineHeight: '1.5' }}>Te enviamos un email a <strong style={{ color: C.ink }}>{email}</strong> para confirmar tu cuenta. Después ya podés iniciar sesión con tu contraseña.</p>
+            <button onClick={() => { setSignupConfirmSent(false); setMode('login') }} style={{ marginTop: '24px', color: C.accent, background: 'none', border: 'none', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}>Volver</button>
           </div>
         ) : mode === 'magic' ? (
           <>
-            <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '26px', color: '#0f0f0f', marginBottom: '8px', lineHeight: '1.2' }}>Link mágico</h1>
-            <p style={{ color: '#4a4a4a', fontSize: '15px', marginBottom: '32px' }}>Te mandamos un link de acceso, sin contraseña.</p>
+            <h1 style={{ fontSize: '25px', fontWeight: 600, color: C.ink, marginBottom: '8px', lineHeight: '1.2', letterSpacing: '-0.02em' }}>Link mágico</h1>
+            <p style={{ color: C.muted, fontSize: '15px', marginBottom: '32px' }}>Te mandamos un link de acceso, sin contraseña.</p>
             <form onSubmit={handleMagicSubmit}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#0f0f0f', marginBottom: '6px' }}>Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required style={inputStyle} />
-              {error && <p style={{ color: '#dc2626', fontSize: '13px', marginTop: '8px' }}>{error}</p>}
-              <button type="submit" disabled={loading || !email} style={{ width: '100%', marginTop: '20px', padding: '13px', backgroundColor: loading || !email ? '#a3c4b5' : G.green, color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: loading || !email ? 'not-allowed' : 'pointer' }}>
+              <label style={labelStyle}>Email</label>
+              <input className="tn-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required />
+              {error && <p style={{ color: C.danger, fontSize: '13px', marginTop: '8px' }}>{error}</p>}
+              <button className="tn-btn-primary" type="submit" disabled={loading || !email} style={{ width: '100%', marginTop: '20px' }}>
                 {loading ? 'Enviando...' : 'Enviar link de acceso'}
               </button>
             </form>
-            <button onClick={() => setMode('login')} style={{ marginTop: '20px', color: '#4a4a4a', background: 'none', border: 'none', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>Volver a iniciar sesión con contraseña</button>
+            <button onClick={() => setMode('login')} style={{ marginTop: '20px', color: C.muted, background: 'none', border: 'none', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>Volver a iniciar sesión con contraseña</button>
           </>
         ) : (
           <>
-            <div style={{ display: 'flex', gap: '4px', marginBottom: '28px', backgroundColor: '#f3f1ec', borderRadius: '10px', padding: '4px' }}>
+            <div style={{ display: 'flex', gap: '4px', marginBottom: '28px', backgroundColor: 'rgba(255,255,255,0.04)', border: `1px solid ${C.edge}`, borderRadius: '10px', padding: '4px' }}>
               <button
                 onClick={() => { setMode('login'); setError('') }}
-                style={{ flex: 1, padding: '9px', borderRadius: '7px', border: 'none', fontSize: '14px', fontWeight: 500, cursor: 'pointer', backgroundColor: mode === 'login' ? '#ffffff' : 'transparent', color: mode === 'login' ? '#0f0f0f' : '#8a8880', boxShadow: mode === 'login' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none' }}>
+                style={{ flex: 1, padding: '9px', borderRadius: '7px', border: 'none', fontSize: '14px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', backgroundColor: mode === 'login' ? '#262626' : 'transparent', color: mode === 'login' ? C.ink : C.faint }}>
                 Iniciar sesión
               </button>
               <button
                 onClick={() => { setMode('signup'); setError('') }}
-                style={{ flex: 1, padding: '9px', borderRadius: '7px', border: 'none', fontSize: '14px', fontWeight: 500, cursor: 'pointer', backgroundColor: mode === 'signup' ? '#ffffff' : 'transparent', color: mode === 'signup' ? '#0f0f0f' : '#8a8880', boxShadow: mode === 'signup' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none' }}>
+                style={{ flex: 1, padding: '9px', borderRadius: '7px', border: 'none', fontSize: '14px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', backgroundColor: mode === 'signup' ? '#262626' : 'transparent', color: mode === 'signup' ? C.ink : C.faint }}>
                 Crear cuenta
               </button>
             </div>
 
-            <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '26px', color: '#0f0f0f', marginBottom: '8px', lineHeight: '1.2' }}>
+            <h1 style={{ fontSize: '25px', fontWeight: 600, color: C.ink, marginBottom: '8px', lineHeight: '1.2', letterSpacing: '-0.02em' }}>
               {mode === 'signup' ? 'Creá tu cuenta' : 'Ingresá a tu cuenta'}
             </h1>
-            <p style={{ color: '#4a4a4a', fontSize: '15px', marginBottom: '28px' }}>
+            <p style={{ color: C.muted, fontSize: '15px', marginBottom: '28px' }}>
               {mode === 'signup' ? 'Gestioná tu agenda en minutos.' : 'Entrá con tu email y contraseña.'}
             </p>
 
             <form onSubmit={handlePasswordSubmit}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#0f0f0f', marginBottom: '6px' }}>Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required style={inputStyle} />
+              <label style={labelStyle}>Email</label>
+              <input className="tn-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required />
 
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#0f0f0f', marginTop: '16px', marginBottom: '6px' }}>Contraseña</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={8} style={inputStyle} />
+              <label style={{ ...labelStyle, marginTop: '16px' }}>Contraseña</label>
+              <input className="tn-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={8} />
 
               {mode === 'signup' && (
                 <>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#0f0f0f', marginTop: '16px', marginBottom: '6px' }}>Confirmar contraseña</label>
-                  <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" required minLength={8} style={inputStyle} />
+                  <label style={{ ...labelStyle, marginTop: '16px' }}>Confirmar contraseña</label>
+                  <input className="tn-input" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" required minLength={8} />
                 </>
               )}
 
-              {error && <p style={{ color: '#dc2626', fontSize: '13px', marginTop: '8px' }}>{error}</p>}
+              {error && <p style={{ color: C.danger, fontSize: '13px', marginTop: '8px' }}>{error}</p>}
 
               <button
+                className="tn-btn-primary"
                 type="submit"
                 disabled={loading || !email || !password}
-                style={{ width: '100%', marginTop: '20px', padding: '13px', backgroundColor: loading || !email || !password ? '#a3c4b5' : G.green, color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: loading || !email || !password ? 'not-allowed' : 'pointer' }}>
+                style={{ width: '100%', marginTop: '20px' }}>
                 {loading ? 'Un momento...' : mode === 'signup' ? 'Crear cuenta' : 'Iniciar sesión'}
               </button>
             </form>
 
             {mode === 'login' && (
-              <button onClick={() => { setMode('magic'); setError('') }} style={{ marginTop: '20px', color: '#4a4a4a', background: 'none', border: 'none', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>
+              <button onClick={() => { setMode('magic'); setError('') }} style={{ marginTop: '20px', color: C.muted, background: 'none', border: 'none', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>
                 ¿Olvidaste tu contraseña? Entrá con link mágico
               </button>
             )}
@@ -205,7 +204,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: '#f7f5f0' }} />}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: '#0a0a0a' }} />}>
       <LoginForm />
     </Suspense>
   )
