@@ -4,8 +4,6 @@ import type { Booking } from "@/types/database";
 import { formatSlotDateTime, formatSlotTime } from "@/lib/utils/format-date";
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 
-const G = { green: "#1a6b4a", lightGreen: "#e8f2ed" };
-
 type Counts = { confirmed: number; pending: number; cancelled: number };
 export type StatusFilter = "" | "CONFIRMED" | "PENDING" | "CANCELLED";
 
@@ -51,11 +49,11 @@ function BookingDetailModal({ booking, onClose }: { booking: Booking; onClose: (
   const slotStart = booking.slot?.start_time;
   const expiresAt = booking.expires_at;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="max-h-[90vh] w-full max-w-md overflow-auto rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="max-h-[90vh] w-full max-w-md overflow-auto rounded-2xl border border-edge bg-surface-2 p-6 shadow-xl shadow-black/40" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-semibold text-zinc-900">Detalle del turno</h3>
-          <button type="button" onClick={onClose} className="rounded p-1 text-zinc-400 hover:text-zinc-700 text-xl leading-none">×</button>
+          <h3 className="text-lg font-semibold text-ink">Detalle del turno</h3>
+          <button type="button" onClick={onClose} className="rounded p-1 text-faint hover:text-ink text-xl leading-none">×</button>
         </div>
         <dl className="space-y-4">
           {[
@@ -65,27 +63,27 @@ function BookingDetailModal({ booking, onClose }: { booking: Booking; onClose: (
             { label: "Fecha y hora", val: slotStart ? `${formatSlotDateTime(slotStart)}${booking.slot?.end_time ? ` a ${formatSlotTime(booking.slot.end_time)}` : ""}` : "—" },
           ].map(({ label, val }) => (
             <div key={label}>
-              <dt className="text-sm font-medium text-zinc-500">{label}</dt>
-              <dd className="mt-0.5 text-zinc-900">{val}</dd>
+              <dt className="text-sm font-medium text-muted">{label}</dt>
+              <dd className="mt-0.5 text-ink">{val}</dd>
             </div>
           ))}
           <div>
-            <dt className="text-sm font-medium text-zinc-500">Estado</dt>
+            <dt className="text-sm font-medium text-muted">Estado</dt>
             <dd className="mt-0.5">
-              <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${booking.status === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : booking.status === "PENDING" ? "bg-amber-100 text-amber-800" : "bg-zinc-100 text-zinc-600"}`}>
+              <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${booking.status === "CONFIRMED" ? "bg-accent/10 text-accent" : booking.status === "PENDING" ? "bg-warn/10 text-warn" : "bg-white/5 text-muted"}`}>
                 {STATUS_LABELS[booking.status] ?? booking.status}
               </span>
             </dd>
           </div>
           {booking.status === "PENDING" && expiresAt && (
             <div>
-              <dt className="text-sm font-medium text-zinc-500">Vence</dt>
-              <dd className="mt-0.5 text-amber-700">{formatSlotDateTime(expiresAt)}</dd>
+              <dt className="text-sm font-medium text-muted">Vence</dt>
+              <dd className="mt-0.5 text-warn">{formatSlotDateTime(expiresAt)}</dd>
             </div>
           )}
         </dl>
         <div className="mt-6 flex justify-end">
-          <button type="button" onClick={onClose} className="rounded-xl px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor: G.green }}>Cerrar</button>
+          <button type="button" onClick={onClose} className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-accent">Cerrar</button>
         </div>
       </div>
     </div>
@@ -97,15 +95,15 @@ export function TurnosSummaryCards() {
   const total = counts.confirmed + counts.pending + counts.cancelled;
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-zinc-900">Mis turnos</h2>
-      <p className="mt-1 text-sm text-zinc-500">Resumen por estado</p>
+    <div className="rounded-2xl border border-edge bg-surface p-6">
+      <h2 className="text-lg font-semibold text-ink">Mis turnos</h2>
+      <p className="mt-1 text-sm text-muted">Resumen por estado</p>
       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { key: "" as StatusFilter, label: "Todos", val: total, bg: "#f3f4f6", color: "#374151", ring: "#374151" },
-          { key: "CONFIRMED" as StatusFilter, label: "Confirmados", val: counts.confirmed, bg: "#dcfce7", color: "#15803d", ring: "#16a34a" },
-          { key: "PENDING" as StatusFilter, label: "Pendientes", val: counts.pending, bg: "#fef9c3", color: "#854d0e", ring: "#d97706" },
-          { key: "CANCELLED" as StatusFilter, label: "Cancelados", val: counts.cancelled, bg: "#f3f4f6", color: "#6b7280", ring: "#9ca3af" },
+          { key: "" as StatusFilter, label: "Todos", val: total, bg: "rgba(255,255,255,0.06)", color: "#d6d6d2", ring: "#8b8b88" },
+          { key: "CONFIRMED" as StatusFilter, label: "Confirmados", val: counts.confirmed, bg: "rgba(142,240,184,0.1)", color: "#8ef0b8", ring: "#8ef0b8" },
+          { key: "PENDING" as StatusFilter, label: "Pendientes", val: counts.pending, bg: "rgba(240,210,142,0.1)", color: "#f0d28e", ring: "#f0d28e" },
+          { key: "CANCELLED" as StatusFilter, label: "Cancelados", val: counts.cancelled, bg: "rgba(255,255,255,0.04)", color: "#8b8b88", ring: "#55554f" },
         ].map(({ key, label, val, bg, color, ring }) => (
           <button key={key} type="button" onClick={() => setStatusFilter(key)}
             className="rounded-xl p-4 text-center transition-all"
@@ -122,12 +120,12 @@ export function TurnosSummaryCards() {
 export function TurnosList() {
   const { bookings, statusFilter, setStatusFilter, searchQuery, setSearchQuery, filteredBookings, detailBooking, setDetailBooking } = useTurnosSection();
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-zinc-900">Listado de turnos</h2>
-      <p className="mt-1 text-sm text-zinc-500">Buscá y filtrá por estado.</p>
+    <section className="rounded-2xl border border-edge bg-surface p-6">
+      <h2 className="text-lg font-semibold text-ink">Listado de turnos</h2>
+      <p className="mt-1 text-sm text-muted">Buscá y filtrá por estado.</p>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as StatusFilter)}
-          className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900">
+          className="rounded-xl border border-edge bg-surface-2 px-3 py-2 text-sm text-ink">
           <option value="">Todos los estados</option>
           <option value="CONFIRMED">Confirmados</option>
           <option value="PENDING">Pendientes</option>
@@ -135,37 +133,37 @@ export function TurnosList() {
         </select>
         <input type="search" placeholder="Buscar por nombre o email..." value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="flex-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 sm:max-w-sm" />
+          className="flex-1 rounded-xl border border-edge bg-white/5 px-3 py-2 text-sm text-ink placeholder-faint sm:max-w-sm" />
       </div>
       <div className="mt-4 overflow-x-auto">
         {filteredBookings.length === 0 ? (
-          <p className="rounded-xl py-12 text-center text-sm text-zinc-400" style={{ backgroundColor: "#f9f9f8" }}>
+          <p className="rounded-xl bg-white/[0.03] py-12 text-center text-sm text-faint">
             {bookings.length === 0 ? "Aún no tenés turnos." : "Ningún turno coincide con el filtro."}
           </p>
         ) : (
           <table className="w-full min-w-[600px] border-collapse text-left text-sm">
             <thead>
-              <tr className="border-b border-zinc-200">
+              <tr className="border-b border-edge">
                 {["Cliente", "Email", "Teléfono", "Fecha y hora", "Estado", ""].map(h => (
-                  <th key={h} className={`pb-3 font-medium text-zinc-500 ${h === "" ? "text-right" : ""}`}>{h}</th>
+                  <th key={h} className={`pb-3 font-medium text-muted ${h === "" ? "text-right" : ""}`}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {filteredBookings.map(booking => (
-                <tr key={booking.id} className="border-b border-zinc-100 last:border-0">
-                  <td className="py-3 font-medium text-zinc-900">{booking.client_name}</td>
-                  <td className="py-3 text-zinc-600">{booking.client_email}</td>
-                  <td className="py-3 text-zinc-600">{booking.client_phone || "—"}</td>
-                  <td className="py-3 text-zinc-600">{booking.slot?.start_time ? formatSlotDateTime(booking.slot.start_time) : "—"}</td>
+                <tr key={booking.id} className="border-b border-white/5 last:border-0">
+                  <td className="py-3 font-medium text-ink">{booking.client_name}</td>
+                  <td className="py-3 text-muted">{booking.client_email}</td>
+                  <td className="py-3 text-muted">{booking.client_phone || "—"}</td>
+                  <td className="py-3 text-muted">{booking.slot?.start_time ? formatSlotDateTime(booking.slot.start_time) : "—"}</td>
                   <td className="py-3">
-                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${booking.status === "CONFIRMED" ? "bg-emerald-100 text-emerald-800" : booking.status === "PENDING" ? "bg-amber-100 text-amber-800" : "bg-zinc-100 text-zinc-600"}`}>
+                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${booking.status === "CONFIRMED" ? "bg-accent/10 text-accent" : booking.status === "PENDING" ? "bg-warn/10 text-warn" : "bg-white/5 text-muted"}`}>
                       {STATUS_LABELS[booking.status] ?? booking.status}
                     </span>
                   </td>
                   <td className="py-3 text-right">
                     <button type="button" onClick={() => setDetailBooking(booking)}
-                      className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50">Ver detalle</button>
+                      className="rounded-lg border border-edge px-3 py-1.5 text-xs font-medium text-muted hover:bg-white/5 hover:text-ink">Ver detalle</button>
                   </td>
                 </tr>
               ))}

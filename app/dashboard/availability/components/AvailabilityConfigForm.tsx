@@ -41,21 +41,21 @@ export function AvailabilityConfigForm({ professionalId, services }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-zinc-900">Configuración semanal</h2>
-      <p className="mt-1 text-sm text-zinc-500">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-edge bg-surface p-6">
+      <h2 className="text-lg font-semibold text-ink">Configuración semanal</h2>
+      <p className="mt-1 text-sm text-muted">
         Elegí los días, horarios y —opcionalmente— qué servicio aplica cada día.
       </p>
 
       <div className="mt-6 space-y-4">
         {WEEKDAY_LABELS.map((label, i) => (
-          <div key={label} className="flex flex-wrap items-center gap-4 rounded-lg border border-zinc-100 bg-zinc-50/50 p-4">
-            <label className="flex w-12 items-center gap-2 font-medium text-zinc-700">
+          <div key={label} className="flex flex-wrap items-center gap-4 rounded-lg border border-white/5 bg-white/5/50 p-4">
+            <label className="flex w-12 items-center gap-2 font-medium text-muted">
               <input
                 type="checkbox"
                 checked={config[i]!.active}
                 onChange={(e) => updateDay(i, { active: e.target.checked })}
-                className="h-4 w-4 rounded border-zinc-300"
+                className="h-4 w-4 rounded border-edge"
               />
               {label}
             </label>
@@ -63,31 +63,31 @@ export function AvailabilityConfigForm({ professionalId, services }: Props) {
             {config[i]!.active && (
               <>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-zinc-500">De</span>
+                  <span className="text-sm text-muted">De</span>
                   <input
                     type="time"
                     value={config[i]!.startTime}
                     onChange={(e) => updateDay(i, { startTime: e.target.value })}
-                    className="rounded border border-zinc-300 px-3 py-1.5 text-sm"
+                    className="rounded border border-edge px-3 py-1.5 text-sm"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-zinc-500">a</span>
+                  <span className="text-sm text-muted">a</span>
                   <input
                     type="time"
                     value={config[i]!.endTime}
                     onChange={(e) => updateDay(i, { endTime: e.target.value })}
-                    className="rounded border border-zinc-300 px-3 py-1.5 text-sm"
+                    className="rounded border border-edge px-3 py-1.5 text-sm"
                   />
                 </div>
 
                 {services.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-zinc-500">Servicio</span>
+                    <span className="text-sm text-muted">Servicio</span>
                     <select
                       value={config[i]!.serviceId ?? ""}
                       onChange={(e) => updateDay(i, { serviceId: e.target.value || null })}
-                      className="rounded border border-zinc-300 px-3 py-1.5 text-sm bg-white"
+                      className="rounded border border-edge bg-white/5 px-3 py-1.5 text-sm text-ink"
                     >
                       <option value="">Todos los servicios</option>
                       {services.map((s) => (
@@ -103,7 +103,7 @@ export function AvailabilityConfigForm({ professionalId, services }: Props) {
       </div>
 
       {message && (
-        <p className={`mt-4 text-sm ${message.type === "ok" ? "text-emerald-600" : "text-red-600"}`} role="alert">
+        <p className={`mt-4 text-sm ${message.type === "ok" ? "text-accent" : "text-danger"}`} role="alert">
           {message.text}
         </p>
       )}
@@ -111,7 +111,7 @@ export function AvailabilityConfigForm({ professionalId, services }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="mt-6 w-full rounded-lg bg-zinc-900 px-4 py-3 font-medium text-white hover:bg-zinc-800 disabled:opacity-50 sm:w-auto"
+        className="mt-6 w-full rounded-lg bg-ink px-4 py-3 font-medium text-background transition-colors hover:bg-accent disabled:opacity-50 sm:w-auto"
       >
         {loading ? "Guardando…" : "Guardar disponibilidad"}
       </button>

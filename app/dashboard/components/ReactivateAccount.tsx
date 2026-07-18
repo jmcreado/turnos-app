@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const G = { green: "#1a6b4a" };
-
 type Props = { professionalId: string };
 
 export function ReactivateAccount({ professionalId }: Props) {
@@ -30,22 +28,21 @@ export function ReactivateAccount({ professionalId }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
-      <h1 className="text-lg font-semibold text-zinc-900">Tu cuenta está desactivada</h1>
-      <p className="mt-2 text-sm text-zinc-500">
+    <div className="mx-auto max-w-md rounded-2xl border border-edge bg-surface p-8 text-center">
+      <h1 className="text-lg font-semibold text-ink">Tu cuenta está desactivada</h1>
+      <p className="mt-2 text-sm text-muted">
         Tu link de reservas no está disponible para tus clientes. Podés reactivarla cuando quieras.
       </p>
       <button
         onClick={handleReactivate}
         disabled={loading}
-        className="mt-6 w-full rounded-lg py-2.5 text-sm font-medium text-white disabled:opacity-50"
-        style={{ backgroundColor: G.green }}
+        className="mt-6 w-full rounded-lg bg-ink py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent disabled:opacity-50"
       >
         {loading ? "Reactivando…" : "Reactivar mi cuenta"}
       </button>
       <button
         onClick={handleSignOut}
-        className="mt-3 w-full rounded-lg border border-zinc-300 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+        className="mt-3 w-full rounded-lg border border-edge py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-ink"
       >
         Cerrar sesión
       </button>

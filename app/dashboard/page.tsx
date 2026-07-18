@@ -7,8 +7,6 @@ import { TurnosSectionProvider, TurnosSummaryCards, TurnosList } from "./compone
 import { CopyButton } from "./components/CopyButton";
 import type { Professional, Booking } from "@/types/database";
 
-const G = { green: "#1a6b4a", lightGreen: "#e8f2ed", cream: "#f7f5f0" };
-
 async function getProfessional(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, userEmail: string): Promise<Professional | null> {
   const { data: byEmail } = await supabase.from("professionals").select("*").eq("email", userEmail).maybeSingle();
   if (byEmail) return byEmail as Professional;
@@ -80,7 +78,7 @@ export default async function DashboardPage() {
 
   if (!professional) {
     return (
-      <div className="min-h-screen py-10" style={{ backgroundColor: G.cream }}>
+      <div className="min-h-screen py-10">
         <ProfileForm userEmail={user.email ?? ""} userId={user.id} />
       </div>
     );
@@ -88,7 +86,7 @@ export default async function DashboardPage() {
 
   if (!professional.is_active) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: G.cream }}>
+      <div className="flex min-h-screen items-center justify-center px-4">
         <ReactivateAccount professionalId={professional.id} />
       </div>
     );
@@ -104,25 +102,25 @@ export default async function DashboardPage() {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
   return (
-    <div className="min-h-screen py-8" style={{ backgroundColor: G.cream }}>
+    <div className="min-h-screen py-8">
       <div className="mx-auto max-w-6xl space-y-6 px-4">
 
         {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <WelcomePanel professional={professional} />
           <div className="flex gap-3 pt-1">
-            <a href="/dashboard/availability" className="rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50">Disponibilidad</a>
-            <a href="/dashboard/services/new" className="rounded-xl px-4 py-2.5 text-sm font-medium text-white shadow-sm" style={{ backgroundColor: G.green }}>+ Nuevo servicio</a>
+            <a href="/dashboard/availability" className="rounded-xl border border-edge bg-surface px-4 py-2.5 text-sm font-medium text-ink hover:bg-white/5">Disponibilidad</a>
+            <a href="/dashboard/services/new" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent">+ Nuevo servicio</a>
           </div>
         </div>
 
         {/* Servicios */}
         <div>
-          <h2 className="mb-3 text-base font-semibold text-zinc-900">Mis servicios</h2>
+          <h2 className="mb-3 text-base font-semibold text-ink">Mis servicios</h2>
           {services.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-10 text-center">
-              <p className="text-zinc-500">Todavía no tenés servicios.</p>
-              <a href="/dashboard/services/new" className="mt-4 inline-block rounded-xl px-4 py-2 text-sm font-medium text-white" style={{ backgroundColor: G.green }}>Crear primer servicio</a>
+            <div className="rounded-2xl border border-dashed border-edge bg-surface p-10 text-center">
+              <p className="text-muted">Todavía no tenés servicios.</p>
+              <a href="/dashboard/services/new" className="mt-4 inline-block rounded-xl bg-ink px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-accent">Crear primer servicio</a>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -130,33 +128,33 @@ export default async function DashboardPage() {
                 const m = metrics[service.id] ?? { total: 0, unique: 0, returning: 0 };
                 const shareUrl = `${baseUrl}/book/${professional.slug}?service=${service.id}`;
                 return (
-                  <div key={service.id} className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+                  <div key={service.id} className="rounded-2xl border border-edge bg-surface p-5 transition-colors hover:border-accent/25">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="font-semibold text-zinc-900">{service.name}</h3>
-                        <p className="mt-0.5 text-sm text-zinc-500">{service.duration_minutes} min · ${Number(service.price).toLocaleString("es-AR")} ARS</p>
+                        <h3 className="font-semibold text-ink">{service.name}</h3>
+                        <p className="mt-0.5 text-sm text-muted">{service.duration_minutes} min · ${Number(service.price).toLocaleString("es-AR")} ARS</p>
                       </div>
-                      <a href={`/dashboard/services/${service.id}`} className="rounded-lg border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-50">Editar</a>
+                      <a href={`/dashboard/services/${service.id}`} className="rounded-lg border border-edge px-2.5 py-1 text-xs font-medium text-muted hover:bg-white/5 hover:text-ink">Editar</a>
                     </div>
-                    <div className="mt-4 grid grid-cols-3 divide-x divide-zinc-100 rounded-xl py-3" style={{ backgroundColor: G.lightGreen }}>
+                    <div className="mt-4 grid grid-cols-3 divide-x divide-white/10 rounded-xl bg-accent/[0.07] py-3">
                       <div className="px-3 text-center">
-                        <p className="text-lg font-semibold" style={{ color: G.green }}>{m.total}</p>
-                        <p className="text-xs text-zinc-500">turnos</p>
+                        <p className="text-lg font-semibold text-accent">{m.total}</p>
+                        <p className="text-xs text-muted">turnos</p>
                       </div>
                       <div className="px-3 text-center">
-                        <p className="text-lg font-semibold" style={{ color: G.green }}>{m.unique}</p>
-                        <p className="text-xs text-zinc-500">únicos</p>
+                        <p className="text-lg font-semibold text-accent">{m.unique}</p>
+                        <p className="text-xs text-muted">únicos</p>
                       </div>
                       <div className="px-3 text-center">
-                        <p className="text-lg font-semibold" style={{ color: G.green }}>{m.returning}</p>
-                        <p className="text-xs text-zinc-500">recurrentes</p>
+                        <p className="text-lg font-semibold text-accent">{m.returning}</p>
+                        <p className="text-xs text-muted">recurrentes</p>
                       </div>
                     </div>
-                    <div className="mt-3 flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2">
-                      <span className="flex-1 truncate text-xs text-zinc-500">{shareUrl}</span>
+                    <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2">
+                      <span className="flex-1 truncate text-xs text-muted">{shareUrl}</span>
                       <CopyButton text={shareUrl} />
                     </div>
-                    {service.requires_payment && <p className="mt-2 text-xs text-amber-600">Requiere pago previo</p>}
+                    {service.requires_payment && <p className="mt-2 text-xs text-warn">Requiere pago previo</p>}
                   </div>
                 );
               })}

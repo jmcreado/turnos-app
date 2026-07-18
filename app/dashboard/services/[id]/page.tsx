@@ -77,45 +77,45 @@ export default function EditServicePage() {
 
   if (fetching) {
     return (
-      <div className="min-h-screen bg-zinc-50 py-8">
+      <div className="min-h-screen py-8">
         <div className="mx-auto max-w-lg px-4">
-          <div className="h-64 animate-pulse rounded-2xl bg-zinc-200" />
+          <div className="h-64 animate-pulse rounded-2xl bg-white/5" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="mx-auto max-w-lg px-4">
         <div className="mb-6">
-          <a href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-700">← Volver al dashboard</a>
+          <a href="/dashboard" className="text-sm text-muted hover:text-ink">← Volver al dashboard</a>
         </div>
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-zinc-900">Editar servicio</h1>
+        <div className="rounded-2xl border border-edge bg-surface p-6">
+          <h1 className="text-lg font-semibold text-ink">Editar servicio</h1>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-700">Nombre *</label>
+              <label className="block text-sm font-medium text-ink">Nombre *</label>
               <input
                 type="text"
                 required
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20"
+                className="mt-1 w-full rounded-lg border border-edge bg-white/5 px-4 py-2.5 text-ink focus:border-accent/40 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700">Descripción</label>
+              <label className="block text-sm font-medium text-ink">Descripción</label>
               <textarea
                 rows={2}
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none"
+                className="mt-1 w-full rounded-lg border border-edge bg-white/5 px-4 py-2.5 text-ink focus:border-accent/40 focus:outline-none"
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Duración (min)</label>
+                <label className="block text-sm font-medium text-ink">Duración (min)</label>
                 <input
                   type="number"
                   min={15}
@@ -123,18 +123,18 @@ export default function EditServicePage() {
                   step={15}
                   value={form.duration_minutes}
                   onChange={(e) => setForm((f) => ({ ...f, duration_minutes: Number(e.target.value) || 60 }))}
-                  className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none"
+                  className="mt-1 w-full rounded-lg border border-edge bg-white/5 px-4 py-2.5 text-ink focus:border-accent/40 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Precio (ARS)</label>
+                <label className="block text-sm font-medium text-ink">Precio (ARS)</label>
                 <input
                   type="number"
                   min={0}
                   step={100}
                   value={form.price}
                   onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) || 0 }))}
-                  className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none"
+                  className="mt-1 w-full rounded-lg border border-edge bg-white/5 px-4 py-2.5 text-ink focus:border-accent/40 focus:outline-none"
                 />
               </div>
             </div>
@@ -144,20 +144,20 @@ export default function EditServicePage() {
                 id="requires_payment"
                 checked={form.requires_payment}
                 onChange={(e) => setForm((f) => ({ ...f, requires_payment: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-300"
+                className="h-4 w-4 rounded border-edge"
               />
-              <label htmlFor="requires_payment" className="text-sm text-zinc-700">Requiero pago previo</label>
+              <label htmlFor="requires_payment" className="text-sm text-muted">Requiero pago previo</label>
             </div>
-            {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+            {error && <p className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
             <div className="flex gap-3 pt-2">
-              <button type="submit" disabled={loading} className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50">
+              <button type="submit" disabled={loading} className="flex-1 rounded-lg bg-ink px-4 py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent disabled:opacity-50">
                 {loading ? "Guardando…" : "Guardar cambios"}
               </button>
-              <a href="/dashboard" className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Cancelar</a>
+              <a href="/dashboard" className="rounded-lg border border-edge px-4 py-2.5 text-sm font-medium text-muted hover:bg-white/5">Cancelar</a>
             </div>
           </form>
-          <div className="mt-6 border-t border-zinc-100 pt-4">
-            <button onClick={handleDelete} className="text-sm text-red-500 hover:text-red-700">Desactivar servicio</button>
+          <div className="mt-6 border-t border-white/5 pt-4">
+            <button onClick={handleDelete} className="text-sm text-danger/80 hover:text-danger">Desactivar servicio</button>
           </div>
         </div>
       </div>

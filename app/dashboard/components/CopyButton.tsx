@@ -6,7 +6,7 @@ export function CopyButton({ text }: Props) {
   return (
     <button
       onClick={() => navigator.clipboard.writeText(text)}
-      className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+      className="text-xs font-medium text-muted hover:text-accent"
     >
       Copiar
     </button>

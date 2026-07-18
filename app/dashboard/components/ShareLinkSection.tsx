@@ -21,9 +21,9 @@ export function ShareLinkSection({ professional, baseUrl }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-zinc-900">Mi link</h2>
-      <p className="mt-1 text-sm text-zinc-500">
+    <div className="rounded-2xl border border-edge bg-surface p-6">
+      <h2 className="text-lg font-semibold text-ink">Mi link</h2>
+      <p className="mt-1 text-sm text-muted">
         Compartí este enlace con tus clientes para que reserven turno
       </p>
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -31,12 +31,12 @@ export function ShareLinkSection({ professional, baseUrl }: Props) {
           type="text"
           readOnly
           value={link}
-          className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-700"
+          className="flex-1 rounded-lg border border-edge bg-white/5 px-4 py-2.5 text-sm text-muted"
         />
         <button
           type="button"
           onClick={copyToClipboard}
-          className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 sm:shrink-0"
+          className="rounded-lg bg-ink px-4 py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent sm:shrink-0"
         >
           {copied ? "¡Copiado!" : "Copiar"}
         </button>

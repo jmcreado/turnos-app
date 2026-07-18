@@ -104,47 +104,47 @@ export default function NewServicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="mx-auto max-w-lg px-4 space-y-6">
         <div className="mb-6">
-          <a href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-700">← Volver al dashboard</a>
+          <a href="/dashboard" className="text-sm text-muted hover:text-ink">← Volver al dashboard</a>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h1 className="text-lg font-semibold text-zinc-900">Nuevo servicio</h1>
-          <p className="mt-1 text-sm text-zinc-500">Configurá los detalles de tu servicio.</p>
+        <div className="rounded-2xl border border-edge bg-surface p-6">
+          <h1 className="text-lg font-semibold text-ink">Nuevo servicio</h1>
+          <p className="mt-1 text-sm text-muted">Configurá los detalles de tu servicio.</p>
 
           {!loadingContext && existingServicesCount > 0 && (
-            <div className="mt-4 rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-3 text-sm text-zinc-600">
+            <div className="mt-4 rounded-lg bg-white/5 border border-edge px-4 py-3 text-sm text-muted">
               Ya tenés {existingServicesCount} servicio{existingServicesCount !== 1 ? "s" : ""} activo{existingServicesCount !== 1 ? "s" : ""}. Todos comparten el mismo calendario — un turno de cualquier servicio ocupa el horario para los demás.
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-700">Nombre del servicio *</label>
+              <label className="block text-sm font-medium text-ink">Nombre del servicio *</label>
               <input
                 type="text"
                 required
                 placeholder="Ej: Consulta general"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20"
+                className="mt-1 w-full rounded-lg border border-edge bg-white/5 px-4 py-2.5 text-ink focus:border-accent/40 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700">Descripción (opcional)</label>
+              <label className="block text-sm font-medium text-ink">Descripción (opcional)</label>
               <textarea
                 rows={2}
                 placeholder="Breve descripción del servicio"
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20"
+                className="mt-1 w-full rounded-lg border border-edge bg-white/5 px-4 py-2.5 text-ink focus:border-accent/40 focus:outline-none"
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Duración (min)</label>
+                <label className="block text-sm font-medium text-ink">Duración (min)</label>
                 <input
                   type="number"
                   min={15}
@@ -152,24 +152,24 @@ export default function NewServicePage() {
                   step={15}
                   value={form.duration_minutes}
                   onChange={(e) => setForm((f) => ({ ...f, duration_minutes: Number(e.target.value) || 60 }))}
-                  className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none"
+                  className="mt-1 w-full rounded-lg border border-edge bg-white/5 px-4 py-2.5 text-ink focus:border-accent/40 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Precio (ARS)</label>
+                <label className="block text-sm font-medium text-ink">Precio (ARS)</label>
                 <input
                   type="number"
                   min={0}
                   step={1}
                   value={form.price === 0 ? '' : form.price}
                   onChange={(e) => setForm((f) => ({ ...f, price: e.target.value === '' ? 0 : Number(e.target.value) }))}
-                  className="mt-1 w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-zinc-900 focus:border-zinc-500 focus:outline-none"
+                  className="mt-1 w-full rounded-lg border border-edge bg-white/5 px-4 py-2.5 text-ink focus:border-accent/40 focus:outline-none"
                 />
               </div>
             </div>
 
             {durationTooLong && (
-              <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+              <div className="rounded-lg border border-warn/25 bg-warn/10 px-4 py-3 text-sm text-warn">
                 Tu disponibilidad configurada no tiene ningún bloque libre de {form.duration_minutes} minutos seguidos (el más largo es de {maxWindowMinutes} min). Este servicio no va a tener horarios para reservar hasta que ajustes tu disponibilidad más abajo.
               </div>
             )}
@@ -180,14 +180,14 @@ export default function NewServicePage() {
                 id="requires_payment"
                 checked={form.requires_payment}
                 onChange={(e) => setForm((f) => ({ ...f, requires_payment: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-300"
+                className="h-4 w-4 rounded border-edge"
               />
-              <label htmlFor="requires_payment" className="text-sm text-zinc-700">Requiero pago previo para confirmar el turno</label>
+              <label htmlFor="requires_payment" className="text-sm text-muted">Requiero pago previo para confirmar el turno</label>
             </div>
-            {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+            {error && <p className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
 
             {!loadingContext && !hasAvailability && (
-              <p className="text-sm text-amber-700">
+              <p className="text-sm text-warn">
                 Para crear el servicio primero necesitás configurar tu disponibilidad semanal (más abajo).
               </p>
             )}
@@ -197,18 +197,18 @@ export default function NewServicePage() {
                 type="submit"
                 disabled={!canSubmit}
                 title={!hasAvailability ? "Configurá tu disponibilidad semanal antes de crear el servicio" : undefined}
-                className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 rounded-lg bg-ink px-4 py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {loading ? "Guardando…" : "Crear servicio"}
               </button>
-              <a href="/dashboard" className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Cancelar</a>
+              <a href="/dashboard" className="rounded-lg border border-edge px-4 py-2.5 text-sm font-medium text-muted hover:bg-white/5">Cancelar</a>
             </div>
           </form>
         </div>
 
         {!loadingContext && !hasAvailability && professionalId && (
           <div className="space-y-3">
-            <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+            <div className="rounded-lg border border-warn/25 bg-warn/10 px-4 py-3 text-sm text-warn">
               Todavía no configuraste tu disponibilidad semanal — sin esto, tu servicio no va a tener horarios para que los clientes reserven. Configurala acá abajo:
             </div>
             <AvailabilityConfigForm professionalId={professionalId} services={services} />
@@ -216,9 +216,9 @@ export default function NewServicePage() {
         )}
 
         {!loadingContext && hasAvailability && professionalId && (
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm flex items-center justify-between gap-3">
-            <p className="text-sm text-zinc-600">Tu bloque libre más largo hoy es de <strong>{maxWindowMinutes} min</strong>.</p>
-            <a href="/dashboard/availability" className="text-sm font-medium text-zinc-700 hover:text-zinc-900 whitespace-nowrap">Editar disponibilidad →</a>
+          <div className="rounded-2xl border border-edge bg-surface p-5 flex items-center justify-between gap-3">
+            <p className="text-sm text-muted">Tu bloque libre más largo hoy es de <strong>{maxWindowMinutes} min</strong>.</p>
+            <a href="/dashboard/availability" className="text-sm font-medium text-muted hover:text-ink whitespace-nowrap">Editar disponibilidad →</a>
           </div>
         )}
       </div>
