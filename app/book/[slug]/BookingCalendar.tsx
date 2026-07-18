@@ -10,7 +10,7 @@ import { joinWaitlist } from "@/lib/actions/waitlist";
 import type { Professional } from "@/types/database";
 import { useState, useMemo } from "react";
 
-const G = { green: "#1a6b4a", lightGreen: "#e8f2ed", greenText: "#14532d", amber: "#d97706" };
+const G = { green: "#8ef0b8", lightGreen: "rgba(142,240,184,0.1)", greenText: "#8ef0b8", amber: "#f0d28e", onAccent: "#0a0a0a" };
 
 type SlotRow = { id: string; professional_id: string; start_time: string; end_time: string };
 
@@ -117,10 +117,10 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
   // ── WAITLIST SUCCESS ──────────────────────────────────────────────────────
   if (step === "waitlist-success") {
     return (
-      <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: "#fef3c7" }}>
+      <div className="rounded-2xl border border-warn/25 bg-warn/10 p-8 text-center">
         <div className="text-4xl mb-4">🔔</div>
-        <h2 className="text-lg font-bold mb-2 text-amber-900">¡Anotado en lista de espera!</h2>
-        <p className="text-sm text-amber-800 mb-5">Te avisamos por email si el turno de las <strong>{wlSlot ? fmtTime(wlSlot.start_time) : ""}</strong> se libera.</p>
+        <h2 className="text-lg font-bold mb-2 text-warn">¡Anotado en lista de espera!</h2>
+        <p className="text-sm text-warn mb-5">Te avisamos por email si el turno de las <strong>{wlSlot ? fmtTime(wlSlot.start_time) : ""}</strong> se libera.</p>
         <button onClick={() => { setStep("calendar"); setWlSlot(null); setWlForm({ name: "", email: "" }); }} className="text-sm font-medium" style={{ color: G.greenText }}>Buscar otro horario</button>
       </div>
     );
@@ -129,26 +129,26 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
   // ── WAITLIST FORM ─────────────────────────────────────────────────────────
   if (step === "waitlist-form") {
     return (
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <button onClick={() => setStep("calendar")} className="text-sm text-zinc-400 mb-4 flex items-center gap-1">← Volver</button>
+      <div className="rounded-2xl border border-edge bg-surface p-5">
+        <button onClick={() => setStep("calendar")} className="text-sm text-faint hover:text-ink mb-4 flex items-center gap-1">← Volver</button>
         <div className="text-2xl mb-2">🔔</div>
-        <h2 className="font-bold text-zinc-900 mb-0.5">Lista de espera</h2>
-        <p className="text-sm text-zinc-400 mb-5">{wlSlot ? fmtTime(wlSlot.start_time) : ""}</p>
+        <h2 className="font-bold text-ink mb-0.5">Lista de espera</h2>
+        <p className="text-sm text-faint mb-5">{wlSlot ? fmtTime(wlSlot.start_time) : ""}</p>
         <div className="space-y-3">
           {[{ key: "name", label: "Nombre *", placeholder: "Tu nombre", type: "text" }, { key: "email", label: "Email *", placeholder: "tu@email.com", type: "email" }].map(({ key, label, placeholder, type }) => (
             <div key={key}>
-              <label className="text-xs font-medium text-zinc-500 mb-1 block">{label}</label>
+              <label className="text-xs font-medium text-muted mb-1 block">{label}</label>
               <input type={type} placeholder={placeholder} value={wlForm[key as "name" | "email"]}
                 onChange={e => setWlForm(f => ({ ...f, [key]: e.target.value }))}
-                className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-zinc-400" />
+                className="w-full rounded-xl border border-edge bg-white/5 px-4 py-3 text-sm text-ink outline-none focus:border-accent/40" />
             </div>
           ))}
         </div>
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-        <div className="mt-4 rounded-xl p-3 text-sm" style={{ backgroundColor: "#fef3c7", color: "#92400e" }}>📧 Te avisamos por email si se libera — sin compromiso.</div>
+        {error && <p className="mt-3 text-sm text-danger">{error}</p>}
+        <div className="mt-4 rounded-xl border border-warn/25 bg-warn/10 p-3 text-sm text-warn">📧 Te avisamos por email si se libera — sin compromiso.</div>
         <button onClick={handleJoinWaitlist} disabled={loading || !wlForm.name || !wlForm.email}
-          className="w-full py-3.5 rounded-xl text-white font-medium mt-4 text-sm disabled:opacity-40"
-          style={{ backgroundColor: G.amber }}>
+          className="w-full py-3.5 rounded-xl font-medium mt-4 text-sm disabled:opacity-40"
+          style={{ backgroundColor: G.amber, color: G.onAccent }}>
           {loading ? "Anotando..." : "Anotarme en lista de espera"}
         </button>
       </div>
@@ -160,18 +160,18 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
     const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
     const manageUrl = managementToken ? `${baseUrl}/manage/${managementToken}` : null;
     return (
-      <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: G.lightGreen }}>
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl" style={{ backgroundColor: G.green }}>✓</div>
+      <div className="rounded-2xl border border-accent/25 p-8 text-center" style={{ backgroundColor: G.lightGreen }}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl" style={{ backgroundColor: G.green, color: G.onAccent }}>✓</div>
         <h2 className="text-xl font-bold mb-2" style={{ color: G.greenText }}>¡Turno confirmado!</h2>
-        {bookedAt && <p className="text-sm text-zinc-600 mb-0.5"><strong>{bookedAt.time}</strong> · {bookedAt.date}</p>}
-        <p className="text-sm text-zinc-600 mb-5">con {professional.name}</p>
-        <div className="bg-white rounded-xl p-4 text-sm text-zinc-600 text-left mb-5 space-y-2">
+        {bookedAt && <p className="text-sm text-muted mb-0.5"><strong>{bookedAt.time}</strong> · {bookedAt.date}</p>}
+        <p className="text-sm text-muted mb-5">con {professional.name}</p>
+        <div className="rounded-xl border border-edge bg-white/5 p-4 text-sm text-muted text-left mb-5 space-y-2">
           <p>📧 Email enviado a <strong>{form.email}</strong></p>
           <p>🔗 Incluye link para reprogramar o cancelar tu turno</p>
           <p>🔔 Recordatorio automático 24hs antes</p>
         </div>
         {manageUrl && (
-          <a href={manageUrl} className="block w-full py-3 rounded-xl text-white font-medium text-sm mb-3 text-center" style={{ backgroundColor: G.green }}>Gestionar mi turno →</a>
+          <a href={manageUrl} className="block w-full py-3 rounded-xl font-medium text-sm mb-3 text-center" style={{ backgroundColor: G.green, color: G.onAccent }}>Gestionar mi turno →</a>
         )}
         <button onClick={() => { setStep("calendar"); setSelectedSlot(null); setSelectedDay(null); setForm({ name: "", email: "", phone: "" }); }} className="text-sm font-medium" style={{ color: G.green }}>Reservar otro turno</button>
       </div>
@@ -181,10 +181,10 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
   // ── FORM ──────────────────────────────────────────────────────────────────
   if (step === "form") {
     return (
-      <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <button onClick={() => setStep("calendar")} className="text-sm text-zinc-400 mb-4 flex items-center gap-1">← Volver</button>
-        <h2 className="font-bold text-zinc-900 mb-0.5">Tus datos</h2>
-        {selectedSlot && <p className="text-sm text-zinc-400 mb-5">{fmtTime(selectedSlot.start_time)} · {fmtDateShort(selectedSlot.start_time)}</p>}
+      <div className="rounded-2xl border border-edge bg-surface p-5">
+        <button onClick={() => setStep("calendar")} className="text-sm text-faint hover:text-ink mb-4 flex items-center gap-1">← Volver</button>
+        <h2 className="font-bold text-ink mb-0.5">Tus datos</h2>
+        {selectedSlot && <p className="text-sm text-faint mb-5">{fmtTime(selectedSlot.start_time)} · {fmtDateShort(selectedSlot.start_time)}</p>}
         <div className="space-y-3">
           {[
             { key: "name", label: "Nombre completo *", placeholder: "Tu nombre", type: "text" },
@@ -192,20 +192,20 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
             { key: "phone", label: "Teléfono (opcional)", placeholder: "11-xxxx-xxxx", type: "tel" },
           ].map(({ key, label, placeholder, type }) => (
             <div key={key}>
-              <label className="text-xs font-medium text-zinc-500 mb-1 block">{label}</label>
+              <label className="text-xs font-medium text-muted mb-1 block">{label}</label>
               <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]}
                 onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-zinc-400" />
+                className="w-full rounded-xl border border-edge bg-white/5 px-4 py-3 text-sm text-ink outline-none focus:border-accent/40" />
             </div>
           ))}
         </div>
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-3 text-sm text-danger">{error}</p>}
         <div className="mt-4 rounded-xl p-4 text-sm" style={{ backgroundColor: G.lightGreen, color: G.greenText }}>
           💡 Recibirás un link por email para reprogramar o cancelar — sin crear cuenta.
         </div>
         <button onClick={handleBook} disabled={loading || !form.name || !form.email}
-          className="w-full py-3.5 rounded-xl text-white font-medium mt-4 text-sm disabled:opacity-40"
-          style={{ backgroundColor: G.green }}>
+          className="w-full py-3.5 rounded-xl font-medium mt-4 text-sm disabled:opacity-40"
+          style={{ backgroundColor: G.green, color: G.onAccent }}>
           {loading ? "Reservando..." : "Confirmar turno"}
         </button>
       </div>
@@ -216,17 +216,17 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
   return (
     <div className="space-y-4">
       {/* Monthly calendar */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="rounded-2xl border border-edge bg-surface p-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-zinc-900 text-sm capitalize">{monthName}</h2>
+          <h2 className="font-semibold text-ink text-sm capitalize">{monthName}</h2>
           <div className="flex gap-2">
-            <button onClick={prevMonth} className="text-zinc-400 hover:text-zinc-700 text-lg leading-none px-1">‹</button>
-            <button onClick={nextMonth} className="text-zinc-400 hover:text-zinc-700 text-lg leading-none px-1">›</button>
+            <button onClick={prevMonth} className="text-faint hover:text-ink text-lg leading-none px-1">‹</button>
+            <button onClick={nextMonth} className="text-faint hover:text-ink text-lg leading-none px-1">›</button>
           </div>
         </div>
 
         <div className="grid grid-cols-7 mb-1">
-          {WEEKDAYS.map(h => <div key={h} className="text-center text-xs text-zinc-400 font-medium py-1">{h}</div>)}
+          {WEEKDAYS.map(h => <div key={h} className="text-center text-xs text-faint font-medium py-1">{h}</div>)}
         </div>
 
         <div className="grid grid-cols-7 gap-1">
@@ -241,10 +241,10 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
             const isSelected = selectedDay === dateStr;
             const clickable = !isPast && (hasFree || isFull);
 
-            const cellStyle = isSelected ? { backgroundColor: G.green, color: "white" }
+            const cellStyle = isSelected ? { backgroundColor: G.green, color: G.onAccent }
               : hasFree ? { backgroundColor: G.lightGreen, color: G.greenText }
-              : isFull ? { backgroundColor: "#fef3c7", color: "#92400e" }
-              : { color: isPast ? "#d1d5db" : "#9ca3af" };
+              : isFull ? { backgroundColor: "rgba(240,210,142,0.12)", color: "#f0d28e" }
+              : { color: isPast ? "#3f3f3b" : "#55554f" };
 
             return (
               <button key={idx} disabled={!clickable}
@@ -263,28 +263,28 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
           })}
         </div>
         {slotsByDate.size > 0 && (
-          <p className="text-xs text-amber-700 mt-3 text-center">🔔 Días amarillos = lista de espera disponible</p>
+          <p className="text-xs text-warn mt-3 text-center">🔔 Días amarillos = lista de espera disponible</p>
         )}
       </div>
 
       {/* Slots for selected day */}
       {selectedDay && !isDayFull && (
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium text-zinc-400 mb-3">Horarios disponibles</p>
+        <div className="rounded-2xl border border-edge bg-surface p-4">
+          <p className="text-xs font-medium text-faint mb-3">Horarios disponibles</p>
           {(dayData?.free.length ?? 0) === 0
-            ? <p className="text-center text-sm text-zinc-400 py-4">Sin horarios libres</p>
+            ? <p className="text-center text-sm text-faint py-4">Sin horarios libres</p>
             : <div className="grid grid-cols-3 gap-2">
                 {dayData!.free.map(slot => (
                   <button key={slot.id} onClick={() => setSelectedSlot(slot)}
                     className="py-3 rounded-xl text-sm font-medium transition-all"
-                    style={selectedSlot?.id === slot.id ? { backgroundColor: G.green, color: "white" } : { border: "1px solid #e5e7eb", color: "#374151" }}>
+                    style={selectedSlot?.id === slot.id ? { backgroundColor: G.green, color: G.onAccent } : { border: "1px solid rgba(255,255,255,0.09)", color: "#d6d6d2" }}>
                     {fmtTime(slot.start_time)}
                   </button>
                 ))}
               </div>
           }
           {selectedSlot && (
-            <button onClick={() => setStep("form")} className="w-full py-3.5 rounded-xl text-white font-medium mt-4 text-sm" style={{ backgroundColor: G.green }}>
+            <button onClick={() => setStep("form")} className="w-full py-3.5 rounded-xl font-medium mt-4 text-sm" style={{ backgroundColor: G.green, color: G.onAccent }}>
               Continuar con {fmtTime(selectedSlot.start_time)} →
             </button>
           )}
@@ -294,23 +294,23 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
       {/* Full day - waitlist */}
       {selectedDay && isDayFull && (
         <div className="space-y-2">
-          <div className="rounded-2xl p-4" style={{ backgroundColor: "#fef3c7" }}>
-            <p className="text-sm font-medium text-amber-900 mb-0.5">🔔 Día completo</p>
-            <p className="text-sm text-amber-700">Anotate en lista de espera para un horario específico:</p>
+          <div className="rounded-2xl border border-warn/25 bg-warn/10 p-4">
+            <p className="text-sm font-medium text-warn mb-0.5">🔔 Día completo</p>
+            <p className="text-sm text-warn/80">Anotate en lista de espera para un horario específico:</p>
           </div>
           {dayData!.booked.map(slot => {
             const inWL = waitlistSlotIds.includes(slot.id);
             return (
-              <div key={slot.id} className="bg-white rounded-2xl p-4 shadow-sm flex items-center justify-between">
+              <div key={slot.id} className="rounded-2xl border border-edge bg-surface p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-zinc-900">{fmtTime(slot.start_time)} – {fmtTime(slot.end_time)}</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#f3f4f6", color: "#6b7280" }}>Ocupado</span>
+                  <span className="text-sm font-semibold text-ink">{fmtTime(slot.start_time)} – {fmtTime(slot.end_time)}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.06)", color: "#8b8b88" }}>Ocupado</span>
                 </div>
                 {inWL
-                  ? <span className="text-xs px-3 py-1.5 rounded-lg font-medium" style={{ backgroundColor: "#fef3c7", color: "#92400e" }}>✓ En espera</span>
+                  ? <span className="text-xs px-3 py-1.5 rounded-lg font-medium" style={{ backgroundColor: "rgba(240,210,142,0.12)", color: "#f0d28e" }}>✓ En espera</span>
                   : <button onClick={() => { setWlSlot(slot); setWlForm({ name: "", email: "" }); setError(null); setStep("waitlist-form"); }}
-                      className="text-xs px-3 py-1.5 rounded-lg font-medium text-white"
-                      style={{ backgroundColor: G.amber }}>🔔 Anotarme</button>
+                      className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                      style={{ backgroundColor: G.amber, color: G.onAccent }}>🔔 Anotarme</button>
                 }
               </div>
             );
@@ -319,7 +319,7 @@ export function BookingCalendar({ professional, allSlots, bookedSlotIds, waitlis
       )}
 
       {!selectedDay && (
-        <div className="bg-white rounded-2xl p-5 text-center text-sm text-zinc-400" style={{ border: "1px dashed #d1d5db" }}>Seleccioná un día del calendario</div>
+        <div className="rounded-2xl p-5 text-center text-sm text-faint" style={{ border: "1px dashed rgba(255,255,255,0.15)" }}>Seleccioná un día del calendario</div>
       )}
     </div>
   );

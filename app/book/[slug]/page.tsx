@@ -36,10 +36,10 @@ export default async function BookPage({ params, searchParams }: Props) {
 
   if (!selectedService) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#f7f5f0" }}>
+      <div className="tn-glow flex min-h-screen items-center justify-center">
         <div className="text-center px-4">
-          <h1 className="text-xl font-semibold text-zinc-900">{professional.name}</h1>
-          <p className="mt-2 text-zinc-500">Este profesional todavía no tiene servicios disponibles.</p>
+          <h1 className="text-xl font-semibold text-ink">{professional.name}</h1>
+          <p className="mt-2 text-muted">Este profesional todavía no tiene servicios disponibles.</p>
         </div>
       </div>
     );
@@ -101,7 +101,7 @@ export default async function BookPage({ params, searchParams }: Props) {
   const filteredSlots = allAtomicSlots.filter(s => bookableStartIds.has(s.id) || bookedSlotIds.has(s.id) || waitlistSlotIds.has(s.id));
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#f7f5f0" }}>
+    <div className="tn-glow min-h-screen">
       <BookingCalendar
         professional={professional}
         allSlots={filteredSlots}

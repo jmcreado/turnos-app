@@ -73,7 +73,7 @@ export default async function ManagePage({ params }: Props) {
   const availableSlots = (slotsRaw ?? []).filter((s) => !bookedSlotIds.has(s.id));
 
   return (
-    <div className="min-h-screen bg-[#f7f5f0] flex items-center justify-center p-4">
+    <div className="tn-glow flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md">
         <ManageBooking booking={bookingData} availableSlots={availableSlots} />
       </div>
