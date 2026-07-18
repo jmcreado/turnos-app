@@ -84,6 +84,7 @@ export async function middleware(request: NextRequest) {
   const needsAuthCheck =
     pathname.startsWith("/dashboard") ||
     pathname === "/login" ||
+    pathname === "/" ||
     pathname.startsWith("/auth/");
 
   if (!needsAuthCheck) {
@@ -126,6 +127,11 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isLogin && user) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  // Usuario autenticado en la landing → directo a su dashboard
+  if (pathname === "/" && user) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
