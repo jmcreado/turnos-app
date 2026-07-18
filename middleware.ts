@@ -3,8 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const DEV_COOKIE = "tornu_dev_access";
 
-// Rutas accesibles sin cookie de dev-access
-const PUBLIC_PATHS = ["/coming-soon", "/dev-access"];
+// Rutas accesibles sin cookie de dev-access.
+// /auth debe pasar siempre: los magic links llegan a /auth/callback con un
+// código one-time; si el gate los redirige, la sesión nunca se crea.
+const PUBLIC_PATHS = ["/coming-soon", "/dev-access", "/auth"];
 
 /**
  * Middleware con dos responsabilidades:
@@ -31,12 +33,46 @@ export async function middleware(request: NextRequest) {
     if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
       return NextResponse.next();
     }
-    if (pathname === "/") {
-      // La URL queda tornu.app pero se sirve la coming-soon
-      return NextResponse.rewrite(new URL("/coming-soon", request.url));
+
+    // Usuario ya autenticado en Supabase → pasa el gate aunque no tenga la
+    // cookie de dev-access (ej: sesión creada vía magic link en otro browser).
+    // Seguro: nadie puede registrarse sin la cookie porque /login está gateado.
+    const hasSbCookies = request.cookies
+      .getAll()
+      .some((c) => c.name.startsWith("sb-"));
+    if (hasSbCookies) {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      if (url && key) {
+        const supabase = createServerClient(url, key, {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll();
+            },
+            setAll() {
+              /* solo lectura para el chequeo del gate */
+            },
+          },
+        });
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          if (pathname === "/") {
+            return NextResponse.rewrite(new URL("/coming-soon", request.url));
+          }
+          return NextResponse.redirect(new URL("/", request.url));
+        }
+        // Autenticado: sigue al bloque 2 (sesión + protección de rutas)
+      }
+    } else {
+      if (pathname === "/") {
+        // La URL queda tornu.app pero se sirve la coming-soon
+        return NextResponse.rewrite(new URL("/coming-soon", request.url));
+      }
+      // Cualquier otra ruta (login, dashboard, book, manage…) → home
+      return NextResponse.redirect(new URL("/", request.url));
     }
-    // Cualquier otra ruta (login, dashboard, book, manage…) → home
-    return NextResponse.redirect(new URL("/", request.url));
   }
 
   // Con acceso dev, /coming-soon no tiene sentido: a la app real
